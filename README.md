@@ -1,5 +1,6 @@
 # Bachelor's degree thesis project Repository
-Thesis Title: Application of GNN for FACIAL EMOTION RECOGNITION Task
+Thesis Title: 
+Face Morphing: Analysis and Detection for Digital Security
 
 ## Requisiti
 
