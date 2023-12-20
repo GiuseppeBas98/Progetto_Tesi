@@ -130,7 +130,7 @@ def colleziona_grafo(dir_path):
             num_graph = 0
             foto_name = percorso_immagine.split(os.path.sep)[-1]
             img = cv2.imread(percorso_immagine)
-            graph = mp.buildGraphNorm(img, distType)
+            graph = mp.buildOllivierRicciGraph(img, distType)
 
             if graph is None:
                 none_graphs = 1
@@ -141,7 +141,7 @@ def colleziona_grafo(dir_path):
             if subject not in subjectsTrain:
                 subjectsTrain.append(subject)
 
-            label = 'bonafide'
+            label = 'morphed'
             grafo = graph2Data(graph, label)
 
             # Chiamare la funzione per salvare il dato nel file
@@ -151,7 +151,7 @@ def colleziona_grafo(dir_path):
             print_memory_usage()
             print(f"Total Subjects: {len(subjectsTrain)}")
 
-def image_generator_bonafide():
+def image_generator_morphed():
     #for dir_path in dir_paths:
         #print(f"\nProcessing images in folder: {dir_path}")
         #if dir_path == r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\datasets\SMDD_dataset\m15k_t\SubFolder_Morphed_1":
@@ -163,7 +163,7 @@ def image_generator_bonafide():
 
 # METODO PER LA REALIZZAZIONE DEL SET DI TRAINING E TESTING PER IMMAGINI MORPHATE
 def beginLoopTrain():
-    image_generator_bonafide()
+    image_generator_morphed()
 
 
 beginLoopTrain()

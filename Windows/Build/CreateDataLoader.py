@@ -2,8 +2,8 @@ import torch
 from torch_geometric.loader import DataLoader
 
 
-file_name = "graph2Data.txt"
-file_path = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\Windows\Build\graph2Data.txt"
+file_name = "graph2DataMANHATTAN.txt"
+file_path = r"/Windows/Build/graph2DataMANHATTAN.txt"
 
 
 def create_dataloader(dataset, batch_size):
@@ -50,6 +50,7 @@ def crea_dataLoader():
     data_loader = create_dataloader(dataFromTxt, batch_size=60)
     save_dataloader(data_loader, 'TrainDataloader')
 
+    '''
     i = 0
     for batch in data_loader:
         # Estrai le tuple dai batch
@@ -58,6 +59,8 @@ def crea_dataLoader():
         print(i)
         print(data)
         print(filename)
+    '''
+
 
 
 crea_dataLoader()
