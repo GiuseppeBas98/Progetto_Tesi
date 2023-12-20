@@ -18,17 +18,7 @@ Thesis Title: Application of GNN for FACIAL EMOTION RECOGNITION Task
 
 ## Usage
 
-1. **Build Dataloader from Dataset:**
-     WindowsFolder->CKPLUSGraphDataLoader
-     WindowsFolder->FERGraphDataLoader
-
-3. **Run model's learning :**
-      MacOSFolder->gcnCKMulticlass (Multiclass Classification)
-      MacOSFolder->gcnCK (Binary Classification)
-4. **Dataloaders and Models:**
-      Dataloaders and Models are saved in the specific directories
-5. **Use Models:**
-      MacOSFolder->useTrainedModel/useTrainedModelHOG 
+TODO
    
     
 
