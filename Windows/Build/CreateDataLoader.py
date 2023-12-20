@@ -50,6 +50,16 @@ def crea_dataLoader():
     data_loader = create_dataloader(dataFromTxt, batch_size=64)
     save_dataloader(data_loader, 'TrainDataloader')
 
+    i = 0
+    for batch in data_loader:
+        # Estrai le tuple dai batch
+        data, filename = batch
+        i += 1
+        print(i)
+        print(data)
+        print(filename)
+
 
 
 crea_dataLoader()
+

@@ -99,25 +99,6 @@ def addGraph(graph, subject):
     # print(total_data)
 
 
-def create_dataloader(dataset, batch_size):
-    # Create DataLoader with the specified dataset and batch size
-    loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
-    # print(f"Created DataLoader for {dataset}")
-    return loader
-
-
-def save_dataloader(loader, filename):
-    path = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\dataloaders\\" + filename + ".pt"
-    torch.save(loader, path)
-    print(f"Dataloader {filename} saved")
-
-
-def load_dataloader(filename):
-    path = r"C:\Users\Giuseppe Basile\Desktop\Tirocinio_Morphing_BG\dataloaders\ " + filename + ".pt"
-    loader = torch.load(path)
-    print(f"Dataloader {filename} loaded")
-    return loader
-
 
 subjectsTrain = []
 subjectsTest = []
@@ -149,26 +130,6 @@ def save_to_txt(subject, grafo):
         file.write(line)
 
 
-def load_data_from_txt(file_path):
-    data = []
-    c = 0
-    with open(file_path, 'r') as file:
-        for line in file:
-            line = line.strip()
-            if not line:
-                continue  # Ignora righe vuote
-            parts = line.split('\t', 1)  # Limita il numero di divisioni a uno
-            if len(parts) == 2:
-                c += 1
-
-                subject, grafo = parts
-                data.append((subject, grafo))
-            else:
-                print(f"Warning: Ignorando la riga malformata: {line}")
-        print(c)
-    return data
-
-
 def colleziona_grafo(dir_path):
     global num_grafico
     global distType
@@ -189,7 +150,7 @@ def colleziona_grafo(dir_path):
             if subject not in subjectsTrain:
                 subjectsTrain.append(subject)
 
-            label = 'morphed'
+            label = 'bonafide'
             grafo = graph2Data(graph, label)
 
             # Chiamare la funzione per salvare il dato nel file
@@ -200,18 +161,13 @@ def colleziona_grafo(dir_path):
             print(f"Total Subjects: {len(subjectsTrain)}")
 
 def image_generator_morphed():
-    for dir_path in dir_paths:
+    #for dir_path in dir_paths:
         #print(f"\nProcessing images in folder: {dir_path}")
-        if dir_path == r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\datasets\SMDD_dataset\m15k_t\SubFolder_Morphed_7":
-            colleziona_grafo(dir_path)
-
-
-def crea_dataLoader():
-    global data_loader
-    dataFromTxt = load_data_from_txt(file_path)
-    data_loader = create_dataloader(dataFromTxt, batch_size=64)
-    # Salvare il DataLoader
-    save_dataloader(data_loader, 'TrainDataloader')
+        #if dir_path == r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\datasets\SMDD_dataset\m15k_t\SubFolder_Morphed_1":
+    with open("Cartella.txt", "r") as file:
+        dir_path = file.read()
+    print("Analizzo foto in Cartella: " + dir_path)
+    colleziona_grafo(dir_path)
 
 
 # METODO PER LA REALIZZAZIONE DEL SET DI TRAINING E TESTING PER IMMAGINI MORPHATE
@@ -220,4 +176,4 @@ def beginLoopTrain():
 
 
 beginLoopTrain()
-#crea_dataLoader()
+

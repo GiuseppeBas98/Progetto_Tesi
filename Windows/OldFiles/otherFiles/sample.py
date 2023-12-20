@@ -24,7 +24,7 @@ init_wandb(name=f'GIN-{args.dataset}', batch_size=args.batch_size, lr=args.lr,
            epochs=args.epochs, hidden_channels=args.hidden_channels,
            num_layers=args.num_layers, device=device)
 
-path = osp.join(osp.dirname(osp.realpath(__file__)), '../../..', 'data', 'TU')
+path = osp.join(osp.dirname(osp.realpath(__file__)), '../..', 'data', 'TU')
 dataset = TUDataset(path, name=args.dataset).shuffle()
 
 train_dataset = dataset[len(dataset) // 10:]
