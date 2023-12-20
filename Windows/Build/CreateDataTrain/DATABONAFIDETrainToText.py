@@ -151,7 +151,7 @@ def colleziona_grafo(dir_path):
             print_memory_usage()
             print(f"Total Subjects: {len(subjectsTrain)}")
 
-def image_generator_morphed():
+def image_generator_bonafide():
     #for dir_path in dir_paths:
         #print(f"\nProcessing images in folder: {dir_path}")
         #if dir_path == r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\datasets\SMDD_dataset\m15k_t\SubFolder_Morphed_1":
@@ -163,7 +163,7 @@ def image_generator_morphed():
 
 # METODO PER LA REALIZZAZIONE DEL SET DI TRAINING E TESTING PER IMMAGINI MORPHATE
 def beginLoopTrain():
-    image_generator_morphed()
+    image_generator_bonafide()
 
 
 beginLoopTrain()
