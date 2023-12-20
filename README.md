@@ -1,5 +1,6 @@
 # Bachelor's degree thesis project Repository
-Thesis Title: Application of GNN for FACIAL EMOTION RECOGNITION Task
+Thesis Title: 
+Face Morphing: Analysis and Detection for Digital Security
 
 ## Requisiti
 
@@ -8,7 +9,7 @@ Thesis Title: Application of GNN for FACIAL EMOTION RECOGNITION Task
 
 1. **Clone the repository:**
     ```bash
-    git clone https://github.com/UniRoby/thesis-L31
+    git clone https://github.com/GiuseppeBas98/Progetto_Tesi.git
     ```
 
 2. **Install dependencies:**
