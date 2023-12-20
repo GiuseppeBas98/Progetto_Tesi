@@ -47,7 +47,7 @@ def load_data_from_txt(file_path):
 def crea_dataLoader():
     global data_loader
     dataFromTxt = load_data_from_txt(file_path)
-    data_loader = create_dataloader(dataFromTxt, batch_size=64)
+    data_loader = create_dataloader(dataFromTxt, batch_size=60)
     save_dataloader(data_loader, 'TrainDataloader')
 
     i = 0
@@ -58,7 +58,6 @@ def crea_dataLoader():
         print(i)
         print(data)
         print(filename)
-
 
 
 crea_dataLoader()
