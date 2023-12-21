@@ -5,9 +5,11 @@ from GraphRicciCurvature.FormanRicci import FormanRicci
 from GraphRicciCurvature.OllivierRicci import OllivierRicci
 from scipy.spatial import distance
 
+
 def showGraph(image,a):
 
-    graph = buildGraph(image, a)
+    #graph = buildOllivierRicciGraph(image, a)
+    graph = buildGraphNorm(image, a)
 
     if(graph is None):
         return
@@ -22,7 +24,7 @@ def showGraph(image,a):
         #cv2.putText(image, str(faceLandmark), nodesPositions[faceLandmark], 0, 0.2, (255,0,0))
 
     cv2.imshow("image",image)
-    cv2.waitKey(0)
+    #cv2.waitKey(0)
     
     
     
