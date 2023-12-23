@@ -3,13 +3,10 @@ import os
 from Windows.Build import mediapipeMesh as mp
 import torch
 import torch_geometric.data as data
-from tqdm import tqdm
 # import tensorflow as tf
-from torch_geometric.loader import DataLoader
-import glob
 import psutil
-import sys
-import csv
+import multiprocessing as mpp
+from multiprocessing import freeze_support
 
 train = 0
 test = 0
@@ -134,7 +131,7 @@ def colleziona_grafo(dir_path):
             mp.showGraph(img, distType)
 
 def image_generator_morphed():
-    with open("Cartella.txt", "r") as file:
+    with open("CartellaRICCI.txt", "r") as file:
         dir_path = file.read()
     print("Analizzo foto in Cartella: " + dir_path)
     colleziona_grafo(dir_path)
@@ -144,6 +141,7 @@ def image_generator_morphed():
 def beginLoopTrain():
     image_generator_morphed()
 
-
+freeze_support()
+mpp.set_start_method('spawn')  # o 'forkserver' a seconda del tuo ambiente
 beginLoopTrain()
 

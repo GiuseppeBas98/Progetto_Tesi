@@ -8,8 +8,8 @@ from scipy.spatial import distance
 
 def showGraph(image,a):
 
-    #graph = buildOllivierRicciGraph(image, a)
-    graph = buildGraphNorm(image, a)
+    graph = buildOllivierRicciGraph(image, a)
+    #graph = buildGraphNorm(image, a)
 
     if(graph is None):
         return
@@ -88,7 +88,10 @@ def buildGraphNorm(image, distType):
         #Calculates the distance
         if distType=="manhattan":
             weight = distance.cityblock([lista_norm[faceEdge[0]].x, lista_norm[faceEdge[0]].y, lista_norm[faceEdge[0]].z], [lista_norm[faceEdge[1]].x, lista_norm[faceEdge[1]].y, lista_norm[faceEdge[1]].z])
-            
+
+        if distType=="euclidean":
+            weight = distance.cityblock([lista_norm[faceEdge[0]].x, lista_norm[faceEdge[0]].y, lista_norm[faceEdge[0]].z], [lista_norm[faceEdge[1]].x, lista_norm[faceEdge[1]].y, lista_norm[faceEdge[1]].z])
+
         #If the weight is equal to 0 adds a near null value
         if(weight != 0):
             graph.add_edge(faceEdge[0],faceEdge[1], weight = weight)   
@@ -139,7 +142,7 @@ def buildOllivierRicciGraph(image, distType):
     if (image is None):
         return
 
-    graph = buildGraph(image, distType)
+    graph = buildGraphNorm(image, distType)
 
     if (graph is None):
         return

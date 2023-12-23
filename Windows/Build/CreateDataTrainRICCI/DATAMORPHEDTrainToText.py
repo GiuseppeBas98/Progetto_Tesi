@@ -3,13 +3,9 @@ import os
 from Windows.Build import mediapipeMesh as mp
 import torch
 import torch_geometric.data as data
-from tqdm import tqdm
 # import tensorflow as tf
-from torch_geometric.loader import DataLoader
-import glob
 import psutil
-import sys
-import csv
+import multiprocessing as mpp
 
 train = 0
 test = 0
@@ -103,11 +99,10 @@ def addGraph(graph, subject):
 subjectsTrain = []
 subjectsTest = []
 noneGraphs = 0
-distType = "manhattan"
+distType = "euclidean"
 num_grafico = 0
-file_name = "../graph2DataMANHATTAN.txt"
-file_path = r"/Windows/Build/graph2DataMANHATTAN.txt"
-
+file_name = "../graph2DataRICCI.txt"
+file_path = r"/Windows/Build/graph2DataRICCI.txt"
 
 
 def print_memory_usage():
@@ -155,7 +150,7 @@ def image_generator_morphed():
     #for dir_path in dir_paths:
         #print(f"\nProcessing images in folder: {dir_path}")
         #if dir_path == r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\datasets\SMDD_dataset\m15k_t\SubFolder_Morphed_1":
-    with open("Cartella.txt", "r") as file:
+    with open("CartellaRICCI.txt", "r") as file:
         dir_path = file.read()
     print("Analizzo foto in Cartella: " + dir_path)
     colleziona_grafo(dir_path)
@@ -166,5 +161,7 @@ def beginLoopTrain():
     image_generator_morphed()
 
 
-beginLoopTrain()
+if __name__ == '__main__':
+    mpp.set_start_method('spawn')  # o 'forkserver' a seconda del tuo ambiente
+    beginLoopTrain()
 

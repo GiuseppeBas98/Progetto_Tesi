@@ -9,7 +9,7 @@ def main():
     # Lista dei percorsi dei tuoi 8 file
     for i in range(1, 9):
         percorso_cartella = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\datasets\SMDD_dataset\m15k_t\SubFolder_Morphed_" + str(i)
-        with open("Cartella.txt", "w") as file:
+        with open("CartellaRICCI.txt", "w") as file:
             file.truncate(0)  # Elimina il contenuto esistente
             file.write(percorso_cartella)
 

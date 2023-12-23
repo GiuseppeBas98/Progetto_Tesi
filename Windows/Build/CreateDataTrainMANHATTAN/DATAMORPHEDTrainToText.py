@@ -3,13 +3,8 @@ import os
 from Windows.Build import mediapipeMesh as mp
 import torch
 import torch_geometric.data as data
-from tqdm import tqdm
 # import tensorflow as tf
-from torch_geometric.loader import DataLoader
-import glob
 import psutil
-import sys
-import csv
 
 train = 0
 test = 0

@@ -1,6 +1,3 @@
-import glob
-
-from Windows.Build import mediapipeMesh as mp
 import cv2
 import torch
 import torch_geometric.data as data
@@ -202,8 +199,6 @@ def graph2Data(graph, emotion):
 
 
 pos=(105, 193)
-
-import os
 
 '''
 dir = r"C:\Users\Giuseppe Basile\Desktop\Tirocinio_Morphing_BG\Image_test"
