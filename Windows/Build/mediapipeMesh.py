@@ -5,6 +5,42 @@ from GraphRicciCurvature.FormanRicci import FormanRicci
 from GraphRicciCurvature.OllivierRicci import OllivierRicci
 from scipy.spatial import distance
 
+#FILE DI RICCIDATA.PY
+
+import matplotlib.pyplot as plt
+
+def show_results(G):
+    # Print the first five results
+    print("Graph")
+    for n1, n2 in list(G.edges())[:]:
+        print("Ollivier-Ricci curvature of edge (%s,%s) is %f" % (n1, n2, G[n1][n2]["ricciCurvature"]))
+def r_file(G):
+    a=[]
+    for n1,n2 in list(G.edges())[:]:
+        a.append(G[n1][n2]["ricciCurvature"])
+    return a
+def histogram(G):
+    # Plot the histogram of Ricci curvatures
+    plt.subplot(2, 1, 1)
+    ricci_curvtures = networkx.get_edge_attributes(G, "ricciCurvature").values()
+    plt.hist(ricci_curvtures,bins=20)
+    plt.xlabel('Ricci curvature')
+    plt.title("Histogram of Ricci Curvatures")
+    # Plot the histogram of edge weights
+    plt.subplot(2, 1, 2)
+    weights = networkx.get_edge_attributes(G, "weight").values()
+    plt.hist(weights,bins=20)
+    plt.xlabel('Edge weight')
+    plt.title("Histogram of Edge weights ")
+
+    plt.tight_layout()
+    plt.show()
+
+#FINE FILE DI RICCIDATA.PY
+
+
+
+
 
 def showGraph(image,a):
 
@@ -89,9 +125,6 @@ def buildGraphNorm(image, distType):
         if distType=="manhattan":
             weight = distance.cityblock([lista_norm[faceEdge[0]].x, lista_norm[faceEdge[0]].y, lista_norm[faceEdge[0]].z], [lista_norm[faceEdge[1]].x, lista_norm[faceEdge[1]].y, lista_norm[faceEdge[1]].z])
 
-        if distType=="euclidean":
-            weight = distance.cityblock([lista_norm[faceEdge[0]].x, lista_norm[faceEdge[0]].y, lista_norm[faceEdge[0]].z], [lista_norm[faceEdge[1]].x, lista_norm[faceEdge[1]].y, lista_norm[faceEdge[1]].z])
-
         #If the weight is equal to 0 adds a near null value
         if(weight != 0):
             graph.add_edge(faceEdge[0],faceEdge[1], weight = weight)   
@@ -141,7 +174,6 @@ def buildFCGraph(image, distType):
 def buildOllivierRicciGraph(image, distType):
     if (image is None):
         return
-
     graph = buildGraphNorm(image, distType)
 
     if (graph is None):

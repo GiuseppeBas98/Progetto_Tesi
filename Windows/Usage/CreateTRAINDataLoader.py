@@ -2,8 +2,8 @@ import torch
 from torch_geometric.loader import DataLoader
 
 
-file_name = "graph2DataMANHATTAN.txt"
-file_path = r"/Windows/Build/graph2DataMANHATTAN.txt"
+file_name = "graph2TrainDataMANHATTAN.txt"
+file_path = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\Windows\Build\graph2TrainDataMANHATTAN.txt"
 
 
 def create_dataloader(dataset, batch_size):
@@ -20,7 +20,7 @@ def save_dataloader(loader, filename):
 
 
 def load_dataloader(filename):
-    path = r"C:\Users\Giuseppe Basile\Desktop\Tirocinio_Morphing_BG\dataloaders\ " + filename + ".pt"
+    path = r"C:\Users\Giuseppe Basile\Desktop\Tirocinio_Morphing_BG\dataloaders\\" + filename + ".pt"
     loader = torch.load(path)
     print(f"Dataloader {filename} loaded")
     return loader
@@ -41,7 +41,6 @@ def load_data_from_txt(file_path):
                 data.append((subject, grafo))
             else:
                 print(f"Warning: Ignorando la riga malformata: {line}")
-        print(c)
     return data
 
 def crea_dataLoader():

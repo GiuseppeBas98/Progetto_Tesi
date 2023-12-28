@@ -100,8 +100,8 @@ subjectsTest = []
 noneGraphs = 0
 distType = "manhattan"
 num_grafico = 0
-file_name = "../graph2DataMANHATTAN.txt"
-file_path = r"/Windows/Build/graph2DataMANHATTAN.txt"
+file_name = "../graph2TrainDataMANHATTAN.txt"
+file_path = r"/Windows/Build/graph2TrainDataMANHATTAN.txt"
 
 
 

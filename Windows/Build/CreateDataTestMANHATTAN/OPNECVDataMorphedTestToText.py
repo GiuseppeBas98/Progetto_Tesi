@@ -5,8 +5,6 @@ import torch
 import torch_geometric.data as data
 # import tensorflow as tf
 import psutil
-from GraphRicciCurvature.OllivierRicci import OllivierRicci
-import networkx as nx
 
 train = 0
 test = 0
@@ -96,13 +94,15 @@ def addGraph(graph, subject):
     # print(total_data)
 
 
+
 subjectsTrain = []
 subjectsTest = []
 noneGraphs = 0
 distType = "manhattan"
 num_grafico = 0
-file_name = "../graph2DataRICCI.txt"
-file_path = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\Windows\Build\graph2DataRICCI.txt"
+file_name = "../graph2TestDataMANHATTAN.txt"
+file_path = r"/Windows/Build/graph2TestDataMANHATTAN.txt"
+
 
 
 def print_memory_usage():
@@ -125,21 +125,7 @@ def colleziona_grafo(dir_path):
             num_graph = 0
             foto_name = percorso_immagine.split(os.path.sep)[-1]
             img = cv2.imread(percorso_immagine)
-            graph = mp.buildGraph(img, distType)
-
-            #IMPLEMENTAZIONE RICCI CURVATURE E SALVATAGGIO
-            orc = OllivierRicci(graph, alpha=0.5, verbose="ERROR")
-            orc.compute_ricci_curvature()
-            G_orc = orc.G.copy()
-            # print ("\n\n",images,"\n")
-            x = (nx.get_edge_attributes(graph, "weight").values())
-            label = 0
-            with open(file_name, 'a') as file:
-                line = f"{x}\t{foto_name}\t{mp.r_file(G_orc)}\n"
-                file.write(line)
-            #FINE
-
-
+            graph = mp.buildGraphNorm(img, distType)
 
             if graph is None:
                 none_graphs = 1
@@ -150,22 +136,28 @@ def colleziona_grafo(dir_path):
             if subject not in subjectsTrain:
                 subjectsTrain.append(subject)
 
+            label = 'morphed'
+            grafo = graph2Data(graph, label)
+
+            # Chiamare la funzione per salvare il dato nel file
+            save_to_txt(subject, grafo)
+
             # Stampiamo alcune informazioni sulla memoria
             print_memory_usage()
             print(f"Total Subjects: {len(subjectsTrain)}")
 
-
 def image_generator_morphed():
-    # for dir_path in dir_paths:
-    # print(f"\nProcessing images in folder: {dir_path}")
-    # if dir_path == r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\datasets\SMDD_dataset\m15k_t\SubFolder_Morphed_1":
-    with open("CartellaRICCI.txt", "r") as file:
-        dir_path = file.read()
+    #with open("Cartella.txt", "r") as file:
+    #    dir_path = file.read()
+    dir_path = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\datasets\FRLL_dataset\FRLL-Morphs\facelab_london\morph_opencv"
     print("Analizzo foto in Cartella: " + dir_path)
     colleziona_grafo(dir_path)
 
 
+# METODO PER LA REALIZZAZIONE DEL SET DI TRAINING E TESTING PER IMMAGINI MORPHATE
 def beginLoopTrain():
     image_generator_morphed()
 
+
 beginLoopTrain()
+
