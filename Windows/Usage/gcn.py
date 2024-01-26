@@ -9,9 +9,6 @@ from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, precision_
 import numpy as np
 
 
-
-
-
 loss_list = []
 accuracy_list = []
 iteration_list = []
@@ -126,7 +123,7 @@ def train(model,train_loader,gnn,optimizer,criterion):
          index += 1
          count+=1
          if gnn=='gcn':
-            out =  model(data.x, data.edge_index, data.batch,data.edge_weight)  # Perform a single forward pass.
+            out =  model(data.x, data.edge_index, data.batch, data.edge_weight)  # Perform a single forward pass.
          elif gnn=='gin' or 'gcn_noedge':
             out = model(data.x, data.edge_index, data.batch)
          loss = criterion(out, data.y.long())  # Compute the loss.

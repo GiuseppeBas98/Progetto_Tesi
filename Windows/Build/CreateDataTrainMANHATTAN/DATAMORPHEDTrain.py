@@ -3,8 +3,10 @@ import os
 from Windows.Build import mediapipeMesh as mp
 import torch
 import torch_geometric.data as data
+from torch.utils.data import Dataset
 # import tensorflow as tf
 import psutil
+from torch_geometric.loader import DataLoader
 
 train = 0
 test = 0
@@ -72,15 +74,16 @@ def graph2Data(graph, type):
         y = 0
     elif type == 'bonafide':
         y = 1
-    y = torch.tensor(y, dtype=torch.long)
+    # y = torch.tensor(y, dtype=torch.long)
     # print(y)
-    # print(f'y: {y}, y_shape: {y.shape}')
+    # print(f'y: {y}')
     # y = F.one_hot(y, num_classes=7)  # One-hot encoding of labels
     # print(f'y_onehot: {y}, y_onehot.shape: {y.shape}')
 
     # DATA
     graph = data.Data(x=x, edge_index=edge_index, edge_weight=edge_weights, y=y)
     # print(graph)
+    # print(graph.x, graph.y, graph.edge_weight, graph.edge_index)
     return graph
 
 
@@ -94,34 +97,34 @@ def addGraph(graph, subject):
     # print(total_data)
 
 
-
+array = []
 subjectsTrain = []
 subjectsTest = []
 noneGraphs = 0
 distType = "manhattan"
 num_grafico = 0
-file_name = "../graph2TrainDataMANHATTAN.txt"
+file_name = "../prova.txt"
 file_path = r"/Windows/Build/graph2TrainDataMANHATTAN.txt"
-
 
 
 def print_memory_usage():
     print(f"Memory Usage: {psutil.virtual_memory().percent}%")
 
 
-def save_to_txt(subject, grafo):
+def save_to_txt(subject, x, edgeW, edgeI, y):
     # Scrivi la riga nel file txt
     with open(file_name, 'a') as file:
-        line = f"{grafo}\t{subject}\n"
+        line = f"soggetto:{subject}\tx:{x}\tedge_weight:{edgeW}\tedge_index:{edgeI}\ty: {y}\n"
         file.write(line)
 
 
 def colleziona_grafo(dir_path):
-    global num_grafico
+    num_grafico = 0
     global distType
     for filename in os.listdir(dir_path):
         percorso_immagine = os.path.join(dir_path, filename)
         if os.path.isfile(percorso_immagine) and filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+            num_grafico += 1
             num_graph = 0
             foto_name = percorso_immagine.split(os.path.sep)[-1]
             img = cv2.imread(percorso_immagine)
@@ -138,18 +141,31 @@ def colleziona_grafo(dir_path):
 
             label = 'morphed'
             grafo = graph2Data(graph, label)
+            '''
+            x=torch.tensor(grafo.x.shape)
+            edgeW = torch.tensor(grafo.edge_weight.shape)
+            edgeI = torch.tensor(grafo.edge_index.shape)
+            y = grafo.y
+            dataGrafo = DataGrafo(subject, x, edgeW, edgeI, y)
+            '''
+
+            array.append((grafo, subject))
 
             # Chiamare la funzione per salvare il dato nel file
-            save_to_txt(subject, grafo)
+            # save_to_txt(subject, x, edgeW, edgeI, y)
+            # print(grafo)
 
             # Stampiamo alcune informazioni sulla memoria
+
             print_memory_usage()
             print(f"Total Subjects: {len(subjectsTrain)}")
+            print(len(array))
+
 
 def image_generator_morphed():
-    #for dir_path in dir_paths:
-        #print(f"\nProcessing images in folder: {dir_path}")
-        #if dir_path == r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\datasets\SMDD_dataset\m15k_t\SubFolder_Morphed_1":
+    # for dir_path in dir_paths:
+    # print(f"\nProcessing images in folder: {dir_path}")
+    # if dir_path == r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\datasets\SMDD_dataset\m15k_t\SubFolder_Morphed_1":
     with open("Cartella.txt", "r") as file:
         dir_path = file.read()
     print("Analizzo foto in Cartella: " + dir_path)
@@ -159,7 +175,81 @@ def image_generator_morphed():
 # METODO PER LA REALIZZAZIONE DEL SET DI TRAINING E TESTING PER IMMAGINI MORPHATE
 def beginLoopTrain():
     image_generator_morphed()
+    crea_dataLoader()
 
 
-beginLoopTrain()
+# METODI PER LA CREAZIONE DEL DATALOADER
+def create_dataloader(dataset, batch_size):
+    # Create DataLoader with the specified dataset and batch size
+    loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+    # print(f"Created DataLoader for {dataset}")
+    return loader
+
+
+def save_dataloader(loader, filename):
+    path = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\dataloaders\\" + filename + ".pt"
+    torch.save(loader, path)
+    print(f"Dataloader {filename} saved")
+
+
+def load_dataloader(filename):
+    path = "/Users/Giuseppe Basile/Desktop/New_Morphing/dataloaders/" + filename + ".pt"
+    loader = torch.load(path)
+    print(f"Dataloader {filename} loaded")
+    return loader
+
+
+def crea_dataLoader():
+    global array
+    path_dataloader_daEliminare = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\dataloaders\TrainDataloader.pt"
+
+    # Verifica se il file esiste
+    if os.path.exists(path_dataloader_daEliminare):
+        # Se il file esiste, sovrascrivi il dataloader e salva
+        data_loader = load_dataloader('TrainDataloader')
+
+        dataset_originale = data_loader.dataset
+        print("ARRAY VECCHIO: ")
+        print(len(dataset_originale))
+
+        array.extend(dataset_originale)
+
+        print("ARRAY NUOVO: ")
+        print(len(array))
+
+        elimina_file_dataloader(path_dataloader_daEliminare)
+
+        data_loader = create_dataloader(array, batch_size=60)
+        save_dataloader(data_loader, 'TrainDataloader')
+        dataset = data_loader.dataset
+        print("LUNGHEZZA: ")
+        print(len(dataset))
+
+    else:
+        # Se il file non esiste, crea un nuovo dataloader e salva
+        data_loader = create_dataloader(array, batch_size=60)
+        save_dataloader(data_loader, 'TrainDataloader')
+        # dataset = data_loader.dataset
+        # print(dataset)
+
+
+def elimina_file_dataloader(file_path):
+    # Elimina il DataLoader
+    # del dataloader
+    # print("DataLoader eliminato")
+
+    # Elimina il file associato
+    try:
+        os.remove(file_path)
+        print(f"File eliminato: {file_path}")
+    except OSError as e:
+        print(f"Errore durante l'eliminazione del file: {e}")
+
+
+# beginLoopTrain()
+d = load_dataloader('TrainDataloader')
+dset = d.dataset
+j = 0
+for i in dset:
+    print(i[0].edge_weight)
 
