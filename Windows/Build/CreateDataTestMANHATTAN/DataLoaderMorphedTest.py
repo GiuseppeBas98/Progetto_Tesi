@@ -105,7 +105,7 @@ distType = "manhattan"
 num_grafico = 0
 file_name = "../prova.txt"
 file_path = r"/Windows/Build/graph2TrainDataMANHATTAN.txt"
-
+nome_cartella = ""
 
 def print_memory_usage():
     print(f"Memory Usage: {psutil.virtual_memory().percent}%")
@@ -155,18 +155,23 @@ def colleziona_grafo(dir_path):
             print(len(array))
 
 
-def image_generator_morphed():
+def image_generator():
+    global nome_cartella
     # for dir_path in dir_paths:
     # print(f"\nProcessing images in folder: {dir_path}")
     # if dir_path == r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\datasets\SMDD_dataset\m15k_t\SubFolder_Morphed_1":
-    dir_path = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\datasets\FRLL_dataset\FRLL-Morphs\facelab_london\morph_opencv"
+    with open("CartellaTest.txt", "r") as file:
+        dir_path = file.read()
     print("Analizzo foto in Cartella: " + dir_path)
     colleziona_grafo(dir_path)
+    nome_cartella = os.path.basename(dir_path)
+    print("QUESTO è IL NOME CHE AVRà IL DATALOADER: ")
+    print(nome_cartella)
 
 
 # METODO PER LA REALIZZAZIONE DEL SET DI TRAINING E TESTING PER IMMAGINI MORPHATE
-def beginLoopTrain():
-    image_generator_morphed()
+def beginLoopTest():
+    image_generator()
     crea_dataLoader()
 
 
@@ -193,17 +198,14 @@ def load_dataloader(filename):
 
 def crea_dataLoader():
     global array
+    global nome_cartella
     data_loader = create_dataloader(array, batch_size=60)
-    save_dataloader(data_loader, 'TestDataloaderOpenCv')
+    save_dataloader(data_loader, 'TestDataloader' + nome_cartella)
     # dataset = data_loader.dataset
     # print(dataset)
 
 
 def elimina_file_dataloader(file_path):
-    # Elimina il DataLoader
-    # del dataloader
-    # print("DataLoader eliminato")
-
     # Elimina il file associato
     try:
         os.remove(file_path)
@@ -212,4 +214,9 @@ def elimina_file_dataloader(file_path):
         print(f"Errore durante l'eliminazione del file: {e}")
 
 
-beginLoopTrain()
+beginLoopTest()
+#d_amsl = load_dataloader('TestDataLoadermorph_amsl')
+#dset1 = d_amsl.dataset
+#print("SET AMSL: ")
+#print(len(dset1))
+

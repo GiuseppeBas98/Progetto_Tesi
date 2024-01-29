@@ -105,7 +105,7 @@ distType = "manhattan"
 num_grafico = 0
 file_name = "../prova.txt"
 file_path = r"/Windows/Build/graph2TrainDataMANHATTAN.txt"
-
+nome_cartella = ""
 
 def print_memory_usage():
     print(f"Memory Usage: {psutil.virtual_memory().percent}%")
@@ -132,7 +132,7 @@ def colleziona_grafo(dir_path):
             if subject not in subjectsTrain:
                 subjectsTrain.append(subject)
 
-            label = 'morphed'
+            label = 'bonafide'
             grafo = graph2Data(graph, label)
             '''
             x=torch.tensor(grafo.x.shape)
@@ -155,18 +155,24 @@ def colleziona_grafo(dir_path):
             print(len(array))
 
 
-def image_generator_morphed():
+def image_generator():
+    global nome_cartella
     # for dir_path in dir_paths:
     # print(f"\nProcessing images in folder: {dir_path}")
     # if dir_path == r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\datasets\SMDD_dataset\m15k_t\SubFolder_Morphed_1":
-    dir_path = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\datasets\FRLL_dataset\FRLL_bonafide\smiling_front"
+    with open("CartellaTest.txt", "r") as file:
+        dir_path_nome = file.read()
+    dir_path = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\datasets\FRLL_dataset\FRLL_bonafide\neutral_front"
     print("Analizzo foto in Cartella: " + dir_path)
     colleziona_grafo(dir_path)
+    nome_cartella = os.path.basename(dir_path_nome)
+    print("QUESTO è IL NOME CHE AVRà IL DATALOADER: ")
+    print(nome_cartella)
 
 
 # METODO PER LA REALIZZAZIONE DEL SET DI TRAINING E TESTING PER IMMAGINI MORPHATE
-def beginLoopTrain():
-    image_generator_morphed()
+def beginLoopTest():
+    image_generator()
     crea_dataLoader()
 
 
@@ -193,12 +199,16 @@ def load_dataloader(filename):
 
 def crea_dataLoader():
     global array
-    path_dataloader_daEliminare = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\dataloaders\TestDataloaderOpenCv.pt"
-
+    global nome_cartella
+    path_dataloader_daEliminare = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\dataloaders\TestDataLoader" + nome_cartella + ".pt"
+    print("STO NELLA FUNZIONE DI CREA DATALOADER BONAFIDE. QUESTO è IL PATH DEL FILE CHE DEVO SOVRASCRIVERE INSERENDO I BONAFIDE: ")
+    print(path_dataloader_daEliminare)
+    print("STO NELLA FUNZIONE DI CREA DATALOADER BONAFIDE. QUESTO è IL NOME DELLA CARTELLA DEI DATI MORPHED: ")
+    print(nome_cartella)
     # Verifica se il file esiste
     if os.path.exists(path_dataloader_daEliminare):
         # Se il file esiste, sovrascrivi il dataloader e salva
-        data_loader = load_dataloader('TestDataloaderOpenCv')
+        data_loader = load_dataloader('TestDataLoader' + nome_cartella)
 
         dataset_originale = data_loader.dataset
         print("ARRAY VECCHIO: ")
@@ -212,23 +222,20 @@ def crea_dataLoader():
         elimina_file_dataloader(path_dataloader_daEliminare)
 
         data_loader = create_dataloader(array, batch_size=60)
-        save_dataloader(data_loader, 'TestDataloaderOpenCv')
-        # dataset = data_loader.dataset
-        # print(dataset)
+        save_dataloader(data_loader, 'TestDataLoader' + nome_cartella)
+        #dataset = data_loader.dataset
+        #print("LUNGHEZZA: ")
+        #print(len(dataset))
 
     else:
         # Se il file non esiste, crea un nuovo dataloader e salva
         data_loader = create_dataloader(array, batch_size=60)
-        save_dataloader(data_loader, 'TestDataloaderOpenCv')
+        save_dataloader(data_loader, 'TestDataloader' + nome_cartella)
         # dataset = data_loader.dataset
         # print(dataset)
 
 
 def elimina_file_dataloader(file_path):
-    # Elimina il DataLoader
-    # del dataloader
-    # print("DataLoader eliminato")
-
     # Elimina il file associato
     try:
         os.remove(file_path)
@@ -236,5 +243,7 @@ def elimina_file_dataloader(file_path):
     except OSError as e:
         print(f"Errore durante l'eliminazione del file: {e}")
 
-
-beginLoopTrain()
+beginLoopTest()
+#d = load_dataloader('TestDataloader' + nome_cartella)
+#dset = d.dataset
+#print(dset)
