@@ -219,7 +219,7 @@ def buildAndShowConfusionMatrix(true_labels,predicted_labels,gnn):
 #start function used to begin the training phase
 def start (gnn,epochs,learningRate,save):
 
-    test_loader = ck.load_dataloader("OPENCVTestDataloader")
+    test_loader = ck.load_dataloader("TestDataloadermorph_opencv")
     train_loader = ck.load_dataloader("TrainDataloader")
 
     # checks on the type of model
