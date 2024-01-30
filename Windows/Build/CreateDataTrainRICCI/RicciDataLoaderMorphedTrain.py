@@ -7,6 +7,7 @@ from torch.utils.data import Dataset
 # import tensorflow as tf
 import psutil
 from torch_geometric.loader import DataLoader
+import multiprocessing as multi
 
 train = 0
 test = 0
@@ -129,44 +130,32 @@ def colleziona_grafo(dir_path):
             foto_name = percorso_immagine.split(os.path.sep)[-1]
             img = cv2.imread(percorso_immagine)
             graph = mp.buildGraphNorm(img, distType)
-
-            if graph is None:
-                none_graphs = 1
-                print(f"\n Null graph index: {num_graph} , number of null graphs: {none_graphs}")
-                continue
+            #ricciCurvGraph = mp.buildGraphNormOllivierCurvature(img, distType)
+            mp.computeRicciCurvature(graph)
+            mp.show_results(graph)
+            #if graph is None:
+            #    none_graphs = 1
+            #    print(f"\n Null graph index: {num_graph} , number of null graphs: {none_graphs}")
+            #    continue
 
             subject = foto_name
             if subject not in subjectsTrain:
                 subjectsTrain.append(subject)
 
             label = 'morphed'
-            grafo = graph2Data(graph, label)
-            '''
-            x=torch.tensor(grafo.x.shape)
-            edgeW = torch.tensor(grafo.edge_weight.shape)
-            edgeI = torch.tensor(grafo.edge_index.shape)
-            y = grafo.y
-            dataGrafo = DataGrafo(subject, x, edgeW, edgeI, y)
-            '''
+            #grafo = graph2Data(ricciCurvGraph, label)
+            #array.append((grafo, subject))
 
-            array.append((grafo, subject))
-
-            # Chiamare la funzione per salvare il dato nel file
-            # save_to_txt(subject, x, edgeW, edgeI, y)
-            # print(grafo)
-
-            # Stampiamo alcune informazioni sulla memoria
-
-            print_memory_usage()
-            print(f"Total Subjects: {len(subjectsTrain)}")
-            print(len(array))
+            #print_memory_usage()
+            #print(f"Total Subjects: {len(subjectsTrain)}")
+            #print(len(array))
 
 
 def image_generator_morphed():
     # for dir_path in dir_paths:
     # print(f"\nProcessing images in folder: {dir_path}")
     # if dir_path == r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\datasets\SMDD_dataset\m15k_t\SubFolder_Morphed_1":
-    with open("Cartella.txt", "r") as file:
+    with open("CartellaRICCI.txt", "r") as file:
         dir_path = file.read()
     print("Analizzo foto in Cartella: " + dir_path)
     colleziona_grafo(dir_path)
@@ -175,7 +164,7 @@ def image_generator_morphed():
 # METODO PER LA REALIZZAZIONE DEL SET DI TRAINING E TESTING PER IMMAGINI MORPHATE
 def beginLoopTrain():
     image_generator_morphed()
-    crea_dataLoader()
+    #crea_dataLoader()
 
 
 # METODI PER LA CREAZIONE DEL DATALOADER
@@ -201,12 +190,12 @@ def load_dataloader(filename):
 
 def crea_dataLoader():
     global array
-    path_dataloader_daEliminare = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\dataloaders\TrainDataloader.pt"
+    path_dataloader_daEliminare = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\dataloaders\TrainDataloaderRICCI.pt"
 
     # Verifica se il file esiste
     if os.path.exists(path_dataloader_daEliminare):
         # Se il file esiste, sovrascrivi il dataloader e salva
-        data_loader = load_dataloader('TrainDataloader')
+        data_loader = load_dataloader('TrainDataloaderRICCI')
 
         dataset_originale = data_loader.dataset
         print("ARRAY VECCHIO: ")
@@ -220,7 +209,7 @@ def crea_dataLoader():
         elimina_file_dataloader(path_dataloader_daEliminare)
 
         data_loader = create_dataloader(array, batch_size=60)
-        save_dataloader(data_loader, 'TrainDataloader')
+        save_dataloader(data_loader, 'TrainDataloaderRICCI')
         dataset = data_loader.dataset
         print("LUNGHEZZA: ")
         print(len(dataset))
@@ -228,7 +217,7 @@ def crea_dataLoader():
     else:
         # Se il file non esiste, crea un nuovo dataloader e salva
         data_loader = create_dataloader(array, batch_size=60)
-        save_dataloader(data_loader, 'TrainDataloader')
+        save_dataloader(data_loader, 'TrainDataloaderRICCI')
         # dataset = data_loader.dataset
         # print(dataset)
 
