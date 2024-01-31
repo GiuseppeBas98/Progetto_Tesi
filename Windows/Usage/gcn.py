@@ -214,22 +214,8 @@ def buildAndShowConfusionMatrix(true_labels,predicted_labels,gnn):
     plt.title('GCN', fontdict=title_font_dict)
 
     # Save the plt graphic as image
-    plt.savefig(r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\models" + gnn + "_binary_matrix.png" )
+    plt.savefig("/Users/Giuseppe Basile/Desktop/New_Morphing/models/" + gnn + "_binary_matrix.png" )
     plt.show()
-
-# METODI PER LA CREAZIONE DEL DATALOADER
-def create_dataloader(dataset, batch_size):
-    # Create DataLoader with the specified dataset and batch size
-    loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
-    # print(f"Created DataLoader for {dataset}")
-    return loader
-
-
-def save_dataloader(loader, filename):
-    path = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\dataloaders\\" + filename + ".pt"
-    torch.save(loader, path)
-    print(f"Dataloader {filename} saved")
-
 
 def load_dataloader(filename):
     path = "/Users/Giuseppe Basile/Desktop/New_Morphing/dataloaders/" + filename + ".pt"
@@ -276,8 +262,8 @@ def start (gnn,epochs,learningRate,save):
 
     # save the trained model
     if save==True:
-        torch.save(model.state_dict(), r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\models" + gnn + "_Binary_model.pth")
+        torch.save(model.state_dict(), "/Users/Giuseppe Basile/Desktop/New_Morphing/models/" + gnn + "_Binary_model.pth")
 
 
 
-start('gcn',100,0.001,True) #150 epoche gin
+start('gcn',50,0.001,True) #150 epoche gin
