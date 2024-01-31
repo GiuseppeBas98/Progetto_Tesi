@@ -74,7 +74,7 @@ def graph2Data(graph, type):
         y = 0
     elif type == 'bonafide':
         y = 1
-    # y = torch.tensor(y, dtype=torch.long)
+    y = torch.tensor(y, dtype=torch.long)
     # print(y)
     # print(f'y: {y}')
     # y = F.one_hot(y, num_classes=7)  # One-hot encoding of labels
@@ -246,10 +246,13 @@ def elimina_file_dataloader(file_path):
         print(f"Errore durante l'eliminazione del file: {e}")
 
 
-beginLoopTrain()
-#d = load_dataloader('TrainDataloader')
-#dset = d.dataset
-#j = 0
-#for i in dset:
-#    print(i[0].edge_weight)
+#beginLoopTrain()
+d = load_dataloader('TrainDataloader')
+print("Number of batches in the train loader:", len(d))
+dset = d.dataset
+#print(len(dset))
+count=0
+for data in d:
+    print(data[0].x)
 
+print(count)

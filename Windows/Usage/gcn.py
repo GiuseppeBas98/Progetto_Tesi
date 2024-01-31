@@ -3,7 +3,6 @@ import torch.nn.functional as F
 from torch.nn import Linear, Sequential, BatchNorm1d, ReLU, Dropout
 from torch_geometric.nn import GCNConv, GINConv
 from torch_geometric.nn import global_mean_pool, global_add_pool
-import CreateTRAINDataLoader as ck
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, precision_score, recall_score, f1_score
 import numpy as np
@@ -117,16 +116,17 @@ def train(model,train_loader,gnn,optimizer,criterion):
     index = 0
     global  count,iteration_list,loss_list
     model.train()
+    dataset_train_dataloader = train_loader.dataset
 
     # Iterate in batches over the training dataset.
     for data in train_loader:
          index += 1
          count+=1
          if gnn=='gcn':
-            out =  model(data.x, data.edge_index, data.batch, data.edge_weight)  # Perform a single forward pass.
+            out =  model(data[0].x, data[0].edge_index, data[0].batch, data[0].edge_weight)  # Perform a single forward pass.
          elif gnn=='gin' or 'gcn_noedge':
-            out = model(data.x, data.edge_index, data.batch)
-         loss = criterion(out, data.y.long())  # Compute the loss.
+            out = model(data[0].x, data[0].edge_index, data[0].batch)
+         loss = criterion(out, data[0].y)  # Compute the loss.
          total_loss += loss / len(train_loader)
          loss.backward()  # Derive gradients.
          optimizer.step()  # Update parameters based on gradients.
@@ -147,17 +147,19 @@ def test(model,loader,gnn,criterion):
      correct = 0
      loss=0
      accuracy=0
+     dataset_test_dataloader = loader.dataset
+
      for data in loader:  # Iterate in batches over the training/test dataset.
          if gnn == 'gcn':
-             out = model(data.x, data.edge_index, data.batch, data.edge_weight)  # Perform a single forward pass.
+             out = model(data[0].x, data[0].edge_index, data[0].batch, data[0].edge_weight)  # Perform a single forward pass.
          elif gnn == 'gin' or 'gcn_noedge':
-             out = model(data.x, data.edge_index, data.batch)
-         loss += criterion(out, data.y.long()) / len(loader)
+             out = model(data[0].x, data[0].edge_index, data[0].batch)
+         loss += criterion(out, data[0].y) / len(dataset_test_dataloader)
          pred = out.argmax(dim=1)  # Use the class with highest probability.
          predicted_labels.extend(pred.tolist())
-         true_labels.extend(data.y.long().tolist())
-         correct += int((pred == data.y.long()).sum())  # Check against ground-truth labels.
-         accuracy= correct / len(loader.dataset)
+         true_labels.extend(data[0].y.tolist())
+         correct += int((pred == data[0].y).sum())  # Check against ground-truth labels.
+         accuracy= correct / len(dataset_test_dataloader)
          accuracy_list.append(accuracy)
 
      return accuracy,loss,predicted_labels,true_labels  # Derive ratio of correct predictions.
@@ -215,26 +217,44 @@ def buildAndShowConfusionMatrix(true_labels,predicted_labels,gnn):
     plt.savefig(r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\models" + gnn + "_binary_matrix.png" )
     plt.show()
 
+# METODI PER LA CREAZIONE DEL DATALOADER
+def create_dataloader(dataset, batch_size):
+    # Create DataLoader with the specified dataset and batch size
+    loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+    # print(f"Created DataLoader for {dataset}")
+    return loader
+
+
+def save_dataloader(loader, filename):
+    path = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\dataloaders\\" + filename + ".pt"
+    torch.save(loader, path)
+    print(f"Dataloader {filename} saved")
+
+
+def load_dataloader(filename):
+    path = "/Users/Giuseppe Basile/Desktop/New_Morphing/dataloaders/" + filename + ".pt"
+    loader = torch.load(path)
+    print(f"Dataloader {filename} loaded")
+    return loader
 
 #start function used to begin the training phase
 def start (gnn,epochs,learningRate,save):
-
-    test_loader = ck.load_dataloader("TestDataloadermorph_opencv")
-    train_loader = ck.load_dataloader("TrainDataloader")
+    test_loader = load_dataloader("TestDataloadermorph_opencv")
+    train_loader = load_dataloader("TrainDataloader")
 
     # checks on the type of model
     if gnn=='gcn':
         model = GCN(dim_h=64,num_node_features=2,num_classes=2)
     elif gnn=='gin':
         model = GIN(dim_h=64,num_node_features=2,num_classes=2)
-    elif gnn == 'gcn_noedge':
+    elif gnn == 'gin' or gnn == 'gcn_noedge':
         model = GCN_NOEDGE(dim_h=64, num_node_features=2, num_classes=2)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=learningRate) #lr=0.0001
     criterion = torch.nn.CrossEntropyLoss()
 
-
     for epoch in range(1, epochs):
+        print("STO NELLA EPOCA NUMERO: " + str(epoch))
 
         model,total_loss=train(model,train_loader,gnn,optimizer,criterion)
         train_acc,train_loss,_,_ = test(model,train_loader,gnn,criterion)
@@ -242,6 +262,7 @@ def start (gnn,epochs,learningRate,save):
         if (epoch % 10 == 0):
             print(f'Epoch: {epoch:03d}, Train Loss: {total_loss:.2f},Train Acc: {train_acc:.4f}')
     # plot confusion matrix
+    print("FINE FOR. BUILD CONFUSION MATRIX")
     buildAndShowConfusionMatrix(true_labels,predicted_labels,gnn)
 
     print(f'Test Loss: {test_loss:.4f}, Test Acc: {test_acc:.4f}')
@@ -259,4 +280,4 @@ def start (gnn,epochs,learningRate,save):
 
 
 
-start('gcn',2000,0.001,True) #150 epoche gin
+start('gcn',100,0.001,True) #150 epoche gin

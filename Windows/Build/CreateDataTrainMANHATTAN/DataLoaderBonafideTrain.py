@@ -74,7 +74,7 @@ def graph2Data(graph, type):
         y = 0
     elif type == 'bonafide':
         y = 1
-    # y = torch.tensor(y, dtype=torch.long)
+    y = torch.tensor(y, dtype=torch.long)
     # print(y)
     # print(f'y: {y}')
     # y = F.one_hot(y, num_classes=7)  # One-hot encoding of labels
@@ -246,7 +246,6 @@ def elimina_file_dataloader(file_path):
 
 
 beginLoopTrain()
-
 #d = load_dataloader('TrainDataloader')
 #dset = d.dataset
 #for d in dset:
