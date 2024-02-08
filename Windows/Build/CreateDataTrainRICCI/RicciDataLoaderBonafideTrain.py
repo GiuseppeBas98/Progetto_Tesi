@@ -103,7 +103,7 @@ subjectsTest = []
 noneGraphs = 0
 distType = "manhattan"
 num_grafico = 0
-file_name = "../prova.txt"
+file_name = "../pisello.py.txt"
 file_path = r"/Windows/Build/graph2TrainDataMANHATTAN.txt"
 
 

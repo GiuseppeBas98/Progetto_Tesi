@@ -9,14 +9,14 @@ def main():
     # Lista dei percorsi dei tuoi 8 file
 
     for i in range(1, 9):
-        percorso_cartella = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\datasets\SMDD_dataset\m15k_t\SubFolder_Morphed_" + str(i)
+        percorso_cartella = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\datasets\SMDD_dataset\ma_cropped\SubFolder_Morphed_" + str(i)
         with open("Cartella.txt", "w") as file:
             file.truncate(0)  # Elimina il contenuto esistente
             file.write(percorso_cartella)
 
         esegui_file("DataLoaderMorphedTrain.py")
-        print("Fine 2k Foto.\nAttendi 20sec prima che le prossime 2k foto vengono eseguite... :)")
-        time.sleep(20)  # Ritardo di 20 secondi tra le esecuzioni
+        print("Fine 2k Foto.\nAttendi 15sec prima che le prossime 2k foto vengono eseguite... :)")
+        time.sleep(15)  # Ritardo di 20 secondi tra le esecuzioni
 
 
     #for file_path in files_da_eseguire:

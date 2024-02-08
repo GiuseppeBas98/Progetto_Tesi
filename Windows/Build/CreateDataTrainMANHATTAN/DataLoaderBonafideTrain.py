@@ -103,36 +103,31 @@ subjectsTest = []
 noneGraphs = 0
 distType = "manhattan"
 num_grafico = 0
-file_name = "../prova.txt"
-file_path = r"/Windows/Build/graph2TrainDataMANHATTAN.txt"
+
 
 
 def print_memory_usage():
     print(f"Memory Usage: {psutil.virtual_memory().percent}%")
 
 
-def save_to_txt(subject, x, edgeW, edgeI, y):
-    # Scrivi la riga nel file txt
-    with open(file_name, 'a') as file:
-        line = f"soggetto:{subject}\tx:{x}\tedge_weight:{edgeW}\tedge_index:{edgeI}\ty: {y}\n"
-        file.write(line)
 
 
 def colleziona_grafo(dir_path):
-    num_grafico = 0
+    global array
+    global num_grafico
+    global noneGraphs
     global distType
     for filename in os.listdir(dir_path):
         percorso_immagine = os.path.join(dir_path, filename)
         if os.path.isfile(percorso_immagine) and filename.lower().endswith(('.png', '.jpg', '.jpeg')):
             num_grafico += 1
-            num_graph = 0
             foto_name = percorso_immagine.split(os.path.sep)[-1]
             img = cv2.imread(percorso_immagine)
             graph = mp.buildGraphNorm(img, distType)
 
             if graph is None:
-                none_graphs = 1
-                print(f"\n Null graph index: {num_graph} , number of null graphs: {none_graphs}")
+                noneGraphs += 1
+                print(f"\n Null graph index: {num_grafico} , number of null graphs: {noneGraphs}")
                 continue
 
             subject = foto_name
@@ -141,21 +136,8 @@ def colleziona_grafo(dir_path):
 
             label = 'bonafide'
             grafo = graph2Data(graph, label)
-            '''
-            x=torch.tensor(grafo.x.shape)
-            edgeW = torch.tensor(grafo.edge_weight.shape)
-            edgeI = torch.tensor(grafo.edge_index.shape)
-            y = grafo.y
-            dataGrafo = DataGrafo(subject, x, edgeW, edgeI, y)
-            '''
-
+            print(grafo.y)
             array.append((grafo, subject))
-
-            # Chiamare la funzione per salvare il dato nel file
-            # save_to_txt(subject, x, edgeW, edgeI, y)
-            # print(grafo)
-
-            # Stampiamo alcune informazioni sulla memoria
 
             print_memory_usage()
             print(f"Total Subjects: {len(subjectsTrain)}")
@@ -245,9 +227,9 @@ def elimina_file_dataloader(file_path):
         print(f"Errore durante l'eliminazione del file: {e}")
 
 
-beginLoopTrain()
-#d = load_dataloader('TrainDataloader')
+# beginLoopTrain()
+d = load_dataloader('TrainDataloader')
 #dset = d.dataset
-#for d in dset:
+for data in d:
 #    print("Data: ")
-#    print(d)
+    print(data[0].y)

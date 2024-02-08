@@ -3,8 +3,6 @@ import os
 from Windows.Build import mediapipeMesh as mp
 import torch
 import torch_geometric.data as data
-from torch.utils.data import Dataset
-# import tensorflow as tf
 import psutil
 from torch_geometric.loader import DataLoader
 
@@ -103,36 +101,28 @@ subjectsTest = []
 noneGraphs = 0
 distType = "manhattan"
 num_grafico = 0
-file_name = "../prova.txt"
-file_path = r"/Windows/Build/graph2TrainDataMANHATTAN.txt"
-
 
 def print_memory_usage():
     print(f"Memory Usage: {psutil.virtual_memory().percent}%")
 
 
-def save_to_txt(subject, x, edgeW, edgeI, y):
-    # Scrivi la riga nel file txt
-    with open(file_name, 'a') as file:
-        line = f"soggetto:{subject}\tx:{x}\tedge_weight:{edgeW}\tedge_index:{edgeI}\ty: {y}\n"
-        file.write(line)
-
 
 def colleziona_grafo(dir_path):
-    num_grafico = 0
+    global array
+    global num_grafico
+    global noneGraphs
     global distType
     for filename in os.listdir(dir_path):
         percorso_immagine = os.path.join(dir_path, filename)
         if os.path.isfile(percorso_immagine) and filename.lower().endswith(('.png', '.jpg', '.jpeg')):
             num_grafico += 1
-            num_graph = 0
             foto_name = percorso_immagine.split(os.path.sep)[-1]
             img = cv2.imread(percorso_immagine)
             graph = mp.buildGraphNorm(img, distType)
 
             if graph is None:
-                none_graphs = 1
-                print(f"\n Null graph index: {num_graph} , number of null graphs: {none_graphs}")
+                noneGraphs += 1
+                print(f"\n Null graph index: {num_grafico} , number of null graphs: {noneGraphs}")
                 continue
 
             subject = foto_name
@@ -141,21 +131,7 @@ def colleziona_grafo(dir_path):
 
             label = 'morphed'
             grafo = graph2Data(graph, label)
-            '''
-            x=torch.tensor(grafo.x.shape)
-            edgeW = torch.tensor(grafo.edge_weight.shape)
-            edgeI = torch.tensor(grafo.edge_index.shape)
-            y = grafo.y
-            dataGrafo = DataGrafo(subject, x, edgeW, edgeI, y)
-            '''
-
             array.append((grafo, subject))
-
-            # Chiamare la funzione per salvare il dato nel file
-            # save_to_txt(subject, x, edgeW, edgeI, y)
-            # print(grafo)
-
-            # Stampiamo alcune informazioni sulla memoria
 
             print_memory_usage()
             print(f"Total Subjects: {len(subjectsTrain)}")
@@ -201,12 +177,12 @@ def load_dataloader(filename):
 
 def crea_dataLoader():
     global array
-    path_dataloader_daEliminare = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\dataloaders\TrainDataloader.pt"
+    path_dataloader_daEliminare = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\dataloaders\TrainProva.pt"
 
     # Verifica se il file esiste
     if os.path.exists(path_dataloader_daEliminare):
         # Se il file esiste, sovrascrivi il dataloader e salva
-        data_loader = load_dataloader('TrainDataloader')
+        data_loader = load_dataloader('TrainProva')
 
         dataset_originale = data_loader.dataset
         print("ARRAY VECCHIO: ")
@@ -220,7 +196,7 @@ def crea_dataLoader():
         elimina_file_dataloader(path_dataloader_daEliminare)
 
         data_loader = create_dataloader(array, batch_size=60)
-        save_dataloader(data_loader, 'TrainDataloader')
+        save_dataloader(data_loader, 'TrainProva')
         dataset = data_loader.dataset
         print("LUNGHEZZA: ")
         print(len(dataset))
@@ -228,16 +204,12 @@ def crea_dataLoader():
     else:
         # Se il file non esiste, crea un nuovo dataloader e salva
         data_loader = create_dataloader(array, batch_size=60)
-        save_dataloader(data_loader, 'TrainDataloader')
+        save_dataloader(data_loader, 'TrainProva')
         # dataset = data_loader.dataset
         # print(dataset)
 
 
 def elimina_file_dataloader(file_path):
-    # Elimina il DataLoader
-    # del dataloader
-    # print("DataLoader eliminato")
-
     # Elimina il file associato
     try:
         os.remove(file_path)
@@ -246,13 +218,13 @@ def elimina_file_dataloader(file_path):
         print(f"Errore durante l'eliminazione del file: {e}")
 
 
-#beginLoopTrain()
-d = load_dataloader('TrainDataloader')
-print("Number of batches in the train loader:", len(d))
-dset = d.dataset
-#print(len(dset))
-count=0
-for data in d:
-    print(data[0].x)
 
-print(count)
+# beginLoopTrain()
+# print(array)
+d = load_dataloader('TrainProva')
+# dset = d.dataset
+# print(len(dset))
+# count = 0
+# print(next(iter(d)))
+for data in d:
+    print(data)

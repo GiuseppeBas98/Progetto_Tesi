@@ -74,7 +74,7 @@ def graph2Data(graph, type):
         y = 0
     elif type == 'bonafide':
         y = 1
-    # y = torch.tensor(y, dtype=torch.long)
+    y = torch.tensor(y, dtype=torch.long)
     # print(y)
     # print(f'y: {y}')
     # y = F.one_hot(y, num_classes=7)  # One-hot encoding of labels
@@ -103,7 +103,7 @@ subjectsTest = []
 noneGraphs = 0
 distType = "manhattan"
 num_grafico = 0
-file_name = "../prova.txt"
+file_name = "../pisello.py.txt"
 file_path = r"/Windows/Build/graph2TrainDataMANHATTAN.txt"
 nome_cartella = ""
 

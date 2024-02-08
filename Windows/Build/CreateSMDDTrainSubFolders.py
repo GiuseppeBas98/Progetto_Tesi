@@ -42,11 +42,11 @@ def divide_in_sottocartelle_BF(cartella_origine, cartella_destinazione, foto_per
         shutil.copy(origine_foto, destinazione_foto)
 
 if __name__ == "__main__":
-    cartella_origineM = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\datasets\SMDD_dataset\m15k_t\Morphed"
-    cartella_destinazioneM = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\datasets\SMDD_dataset\m15k_t"
-    cartella_origineBF = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\datasets\SMDD_dataset\os25k_bf_t\Bonafide"
-    cartella_destinazioneBF = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\datasets\SMDD_dataset\os25k_bf_t"
+    cartella_origineM = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\datasets\SMDD_dataset\ma_cropped\Morphed"
+    cartella_destinazioneM = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\datasets\SMDD_dataset\ma_cropped"
+    cartella_origineBF = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\datasets\SMDD_dataset\bf_cropped\Bonafide"
+    cartella_destinazioneBF = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\datasets\SMDD_dataset\bf_cropped"
     foto_per_sottocartella = 2000
 
-    #divide_in_sottocartelle_M(cartella_origineM, cartella_destinazioneM, foto_per_sottocartella)
+    divide_in_sottocartelle_M(cartella_origineM, cartella_destinazioneM, foto_per_sottocartella)
     divide_in_sottocartelle_BF(cartella_origineBF, cartella_destinazioneBF, foto_per_sottocartella)

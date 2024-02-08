@@ -1,7 +1,6 @@
 import cv2
 import mediapipe
 import networkx
-import networkx as nx
 from GraphRicciCurvature.FormanRicci import FormanRicci
 from GraphRicciCurvature.OllivierRicci import OllivierRicci
 from scipy.spatial import distance
@@ -63,7 +62,7 @@ def showGraph(image, a):
         # cv2.putText(image, str(faceLandmark), nodesPositions[faceLandmark], 0, 0.2, (255,0,0))
 
     cv2.imshow("image", image)
-    # cv2.waitKey(0)
+    #cv2.waitKey(0)
 
 
 def buildGraph(image, distType):

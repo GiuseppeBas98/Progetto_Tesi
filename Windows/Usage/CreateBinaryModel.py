@@ -44,7 +44,7 @@ class GCN_NOEDGE(torch.nn.Module):
 class GCN(torch.nn.Module):
     """GCN"""
 
-    def __init__(self, dim_h,num_node_features,num_classes):
+    def __init__(self, dim_h, num_node_features, num_classes):
         super(GCN, self).__init__()
         torch.manual_seed(12345)
         self.conv1 = GCNConv(num_node_features, dim_h)
@@ -54,11 +54,11 @@ class GCN(torch.nn.Module):
 
     def forward(self, x, edge_index, batch, edge_weight):
         # Node embeddings
-        x = self.conv1(x, edge_index,edge_weight)
+        x = self.conv1(x, edge_index, edge_weight)
         x = x.relu()
-        x = self.conv2(x, edge_index,edge_weight)
+        x = self.conv2(x, edge_index, edge_weight)
         x = x.relu()
-        x= self.conv3(x, edge_index,edge_weight)
+        x= self.conv3(x, edge_index, edge_weight)
 
         # Graph-level readout
         x = global_add_pool(x, batch)
@@ -73,7 +73,7 @@ class GCN(torch.nn.Module):
 class GIN(torch.nn.Module):
     """GIN"""
 
-    def __init__(self, dim_h,num_node_features,num_classes):
+    def __init__(self, dim_h, num_node_features, num_classes):
         super(GIN, self).__init__()
         torch.manual_seed(12345)
         self.conv1 = GINConv(
@@ -109,24 +109,24 @@ class GIN(torch.nn.Module):
 
 
 
-def train(model,train_loader,gnn,optimizer,criterion):
+def train(model, train_loader, gnn, optimizer, criterion):
 
     total_loss = 0
     acc = 0
     index = 0
-    global  count,iteration_list,loss_list
+    global count, iteration_list, loss_list
     model.train()
     dataset_train_dataloader = train_loader.dataset
 
     # Iterate in batches over the training dataset.
     for data in train_loader:
          index += 1
-         count+=1
+         count += 1
          if gnn=='gcn':
             out =  model(data[0].x, data[0].edge_index, data[0].batch, data[0].edge_weight)  # Perform a single forward pass.
          elif gnn=='gin' or 'gcn_noedge':
             out = model(data[0].x, data[0].edge_index, data[0].batch)
-         loss = criterion(out, data[0].y)  # Compute the loss.
+         loss = criterion(out, data[0].y.long())  # Compute the loss.
          total_loss += loss / len(train_loader)
          loss.backward()  # Derive gradients.
          optimizer.step()  # Update parameters based on gradients.
@@ -134,11 +134,11 @@ def train(model,train_loader,gnn,optimizer,criterion):
 
          iteration_list.append(count)
          loss_list.append(loss.item())  # Use item() to get the scalar value of the loss
-    return model,total_loss
+    return model, total_loss
 
 
 
-def test(model,loader,gnn,criterion):
+def test(model, loader, gnn, criterion):
      model.eval()
      global accuracy_list
      plt.close("all")
@@ -154,18 +154,18 @@ def test(model,loader,gnn,criterion):
              out = model(data[0].x, data[0].edge_index, data[0].batch, data[0].edge_weight)  # Perform a single forward pass.
          elif gnn == 'gin' or 'gcn_noedge':
              out = model(data[0].x, data[0].edge_index, data[0].batch)
-         loss += criterion(out, data[0].y) / len(dataset_test_dataloader)
+         loss += criterion(out, data[0].y.long()) / len(loader)
          pred = out.argmax(dim=1)  # Use the class with highest probability.
          predicted_labels.extend(pred.tolist())
-         true_labels.extend(data[0].y.tolist())
-         correct += int((pred == data[0].y).sum())  # Check against ground-truth labels.
-         accuracy= correct / len(dataset_test_dataloader)
+         true_labels.extend(data[0].y.long().tolist())
+         correct += int((pred == data[0].y.long()).sum())  # Check against ground-truth labels.
+         accuracy = correct / len(dataset_test_dataloader)
          accuracy_list.append(accuracy)
 
-     return accuracy,loss,predicted_labels,true_labels  # Derive ratio of correct predictions.
+     return accuracy, loss, predicted_labels, true_labels  # Derive ratio of correct predictions.
 
 def buildAndShowConfusionMatrix(true_labels,predicted_labels,gnn):
-    class_labels = ["Positive Emotion", "Negative Emotion"]
+    class_labels = ["Morphed", "Bonafide"]
     # change font dict inside confusion matrix
     number_font_dict = {
         'weight': 'bold',
@@ -240,16 +240,15 @@ def start (gnn,epochs,learningRate,save):
     criterion = torch.nn.CrossEntropyLoss()
 
     for epoch in range(1, epochs):
-        print("STO NELLA EPOCA NUMERO: " + str(epoch))
 
         model,total_loss=train(model,train_loader,gnn,optimizer,criterion)
         train_acc,train_loss,_,_ = test(model,train_loader,gnn,criterion)
         test_acc,test_loss,predicted_labels,true_labels = test(model,test_loader,gnn,criterion)
         if (epoch % 10 == 0):
             print(f'Epoch: {epoch:03d}, Train Loss: {total_loss:.2f},Train Acc: {train_acc:.4f}')
+
     # plot confusion matrix
-    print("FINE FOR. BUILD CONFUSION MATRIX")
-    buildAndShowConfusionMatrix(true_labels,predicted_labels,gnn)
+    buildAndShowConfusionMatrix(true_labels, predicted_labels, gnn)
 
     print(f'Test Loss: {test_loss:.4f}, Test Acc: {test_acc:.4f}')
 
@@ -259,11 +258,11 @@ def start (gnn,epochs,learningRate,save):
     f1 = f1_score(true_labels, predicted_labels)
 
     print(f'Precision: {precision:.4f}, Recall: {recall:.4f}, F1-Score: {f1:.4f}')
-
+    #print(f'True labels: {true_labels}, Predicted labels: {predicted_labels}')
     # save the trained model
     if save==True:
         torch.save(model.state_dict(), "/Users/Giuseppe Basile/Desktop/New_Morphing/models/" + gnn + "_Binary_model.pth")
 
 
 
-start('gcn',50,0.001,True) #150 epoche gin
+start('gcn',100,0.001,True) #150 epoche gin

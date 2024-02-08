@@ -147,9 +147,9 @@ def alignFace(img_path):
 # ------------------------
 
 
-face_detector_path = "haarcascade_frontalface_default.xml"
-eye_detector_path = "haarcascade_eye.xml"
-nose_detector_path = "haarcascade_mcs_nose.xml"
+face_detector_path = "../OldFiles/OldUtils/haarcascade_frontalface_default.xml"
+eye_detector_path = "../OldFiles/OldUtils/haarcascade_eye.xml"
+nose_detector_path = "../OldFiles/OldUtils/haarcascade_mcs_nose.xml"
 
 face_detector = cv2.CascadeClassifier(face_detector_path)
 eye_detector = cv2.CascadeClassifier(eye_detector_path)
