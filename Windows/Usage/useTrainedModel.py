@@ -1,13 +1,15 @@
 import torch
 import CreateBinaryModel as cm
 import numpy as np
-from DataLoaderMorphedTrain import normalizeNodefeatures,normalizeValues
+from DataLoaderMorphedTrain import normalizeNodefeatures, normalizeValues
 from Windows.Build import mediapipeMesh as mp
 import cv2
 from torch_geometric.loader import DataLoader
 import matplotlib.pyplot as plt
 import torch_geometric.data as data
-#from Windows.OldFiles.OldUtils import AlignImage
+import os
+from Windows.Utils import AlignImage
+
 
 def graph2Data(graph):
     # Extract landmark coordinates from the graph
@@ -48,7 +50,9 @@ def startClassification(gnn, image):
         model = cm.GIN(dim_h=64, num_node_features=2, num_classes=classes)
 
     # Path to the trained weights
-    path = "/Users/Giuseppe Basile/Desktop/New_Morphing/models/" + gnn + bin + "_model_.pth"
+    # path = "/Users/Giuseppe Basile/Desktop/New_Morphing/models/" + gnn + bin + "_model_.pth"
+    path = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\models\gcn_128SizeOpencv_Binary_model.pth"
+    print(path)
 
     # Load trained weights into the model
     model.load_state_dict(torch.load(path))
@@ -92,11 +96,17 @@ def startClassification(gnn, image):
     cv2.destroyAllWindows()
 
 
+# alignedFace = AlignImage.alignFace("/Users/Giuseppe Basile/Desktop/New_Morphing/ImageTesting/img000001_B.png")
+# image, gray_img = AlignImage.detectFace(alignedFace)
+# plt.imshow(image[:, :, ::-1])
+# plt.show()
+# img = cv2.imread("/Users/Giuseppe Basile/Desktop/New_Morphing/ImageTesting/img000001_B.png")
+# startClassification('gcn', image)
 
-#alignedFace = AlignImage.alignFace(r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\datasets\SMDD_dataset\os25k_bf_t\SubFolder_Bonafide_1\img000001.png")
-#image, gray_img = AlignImage.detectFace(alignedFace)
-#plt.imshow(image[:, :, ::-1])
-#plt.show()
-percorso_immagine = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\datasets\FRLL_dataset\FRLL-Morphs\facelab_london\morph_facemorpher\001_002.jpg"
-img = cv2.imread(percorso_immagine)
-startClassification('gcn', img)
+dir_path = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\ImageTesting"
+for filename in os.listdir(dir_path):
+    percorso_immagine = os.path.join(dir_path, filename)
+    # alignedFace = AlignImage.alignFace(percorso_immagine)
+    # image, gray_img = AlignImage.detectFace(alignedFace)
+    image = cv2.imread(percorso_immagine)
+    startClassification('gcn', image)

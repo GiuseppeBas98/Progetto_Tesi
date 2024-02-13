@@ -17,11 +17,5 @@ def main():
         print("Fine 2k Foto.\nAttendi 15sec prima che le prossime 2k foto vengono eseguite... :)")
         time.sleep(15)  # Ritardo di 20 secondi tra le esecuzioni
 
-
-    #for file_path in files_da_eseguire:
-    #    esegui_file(file_path)
-    #    print("Fine Ciclo.\nAttendi 20sec prima che il prossimo file viene eseguito... :)")
-    #    time.sleep(20)  # Ritardo di 20 secondi tra le esecuzioni
-
 if __name__ == "__main__":
     main()

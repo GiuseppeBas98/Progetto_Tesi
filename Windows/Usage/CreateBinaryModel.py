@@ -7,21 +7,22 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, precision_score, recall_score, f1_score
 import numpy as np
 
-
 loss_list = []
 accuracy_list = []
 iteration_list = []
 count = 0
+
+
 class GCN_NOEDGE(torch.nn.Module):
     """GCN"""
 
-    def __init__(self, dim_h,num_node_features,num_classes):
+    def __init__(self, dim_h, num_node_features, num_classes):
         super(GCN_NOEDGE, self).__init__()
         torch.manual_seed(12345)
         self.conv1 = GCNConv(num_node_features, dim_h)
         self.conv2 = GCNConv(dim_h, dim_h)
         self.conv3 = GCNConv(dim_h, dim_h)
-        self.lin = Linear(dim_h,num_classes)
+        self.lin = Linear(dim_h, num_classes)
 
     def forward(self, x, edge_index, batch):
         # Node embeddings
@@ -29,17 +30,18 @@ class GCN_NOEDGE(torch.nn.Module):
         x = x.relu()
         x = self.conv2(x, edge_index)
         x = x.relu()
-        x= self.conv3(x, edge_index)
+        x = self.conv3(x, edge_index)
 
         # Graph-level readout
         x = global_add_pool(x, batch)
-        #x= global_mean_pool(x,batch)
+        # x= global_mean_pool(x,batch)
 
         # Classifier
         x = F.dropout(x, p=0.5, training=self.training)
         x = self.lin(x)
 
         return x
+
 
 class GCN(torch.nn.Module):
     """GCN"""
@@ -50,7 +52,7 @@ class GCN(torch.nn.Module):
         self.conv1 = GCNConv(num_node_features, dim_h)
         self.conv2 = GCNConv(dim_h, dim_h)
         self.conv3 = GCNConv(dim_h, dim_h)
-        self.lin = Linear(dim_h,num_classes)
+        self.lin = Linear(dim_h, num_classes)
 
     def forward(self, x, edge_index, batch, edge_weight):
         # Node embeddings
@@ -58,17 +60,18 @@ class GCN(torch.nn.Module):
         x = x.relu()
         x = self.conv2(x, edge_index, edge_weight)
         x = x.relu()
-        x= self.conv3(x, edge_index, edge_weight)
+        x = self.conv3(x, edge_index, edge_weight)
 
         # Graph-level readout
         x = global_add_pool(x, batch)
-        #x= global_mean_pool(x,batch)
+        # x= global_mean_pool(x,batch)
 
         # Classifier
         x = F.dropout(x, p=0.5, training=self.training)
         x = self.lin(x)
 
         return x
+
 
 class GIN(torch.nn.Module):
     """GIN"""
@@ -86,7 +89,7 @@ class GIN(torch.nn.Module):
         self.conv3 = GINConv(
             Sequential(Linear(dim_h, dim_h), BatchNorm1d(dim_h), ReLU(),
                        Linear(dim_h, dim_h), ReLU()))
-        self.lin1 = Linear(dim_h, dim_h )
+        self.lin1 = Linear(dim_h, dim_h)
         self.lin2 = Linear(dim_h, num_classes)
 
     def forward(self, x, edge_index, batch):
@@ -98,7 +101,6 @@ class GIN(torch.nn.Module):
         # Graph-level readout
         x = global_add_pool(x, batch)
 
-
         # Classifier
         x = self.lin1(x)
         x = x.relu()
@@ -108,63 +110,58 @@ class GIN(torch.nn.Module):
         return x
 
 
-
 def train(model, train_loader, gnn, optimizer, criterion):
-
     total_loss = 0
     acc = 0
     index = 0
     global count, iteration_list, loss_list
     model.train()
-    dataset_train_dataloader = train_loader.dataset
 
     # Iterate in batches over the training dataset.
     for data in train_loader:
-         index += 1
-         count += 1
-         if gnn=='gcn':
-            out =  model(data[0].x, data[0].edge_index, data[0].batch, data[0].edge_weight)  # Perform a single forward pass.
-         elif gnn=='gin' or 'gcn_noedge':
-            out = model(data[0].x, data[0].edge_index, data[0].batch)
-         loss = criterion(out, data[0].y.long())  # Compute the loss.
-         total_loss += loss / len(train_loader)
-         loss.backward()  # Derive gradients.
-         optimizer.step()  # Update parameters based on gradients.
-         optimizer.zero_grad()  # Clear gradients
+        index += 1
+        count += 1
+        if gnn == 'gcn':
+            out = model(data.x, data.edge_index, data.batch, data.edge_weight)  # Perform a single forward pass.
+        elif gnn == 'gin' or 'gcn_noedge':
+            out = model(data.x, data.edge_index, data.batch)
+        loss = criterion(out, data.y.long())  # Compute the loss.
+        total_loss += loss / len(train_loader)
+        loss.backward()  # Derive gradients.
+        optimizer.step()  # Update parameters based on gradients.
+        optimizer.zero_grad()  # Clear gradients
 
-         iteration_list.append(count)
-         loss_list.append(loss.item())  # Use item() to get the scalar value of the loss
+        iteration_list.append(count)
+        loss_list.append(loss.item())  # Use item() to get the scalar value of the loss
     return model, total_loss
 
 
-
 def test(model, loader, gnn, criterion):
-     model.eval()
-     global accuracy_list
-     plt.close("all")
-     predicted_labels = []
-     true_labels = []
-     correct = 0
-     loss=0
-     accuracy=0
-     dataset_test_dataloader = loader.dataset
+    model.eval()
+    global accuracy_list
+    plt.close("all")
+    predicted_labels = []
+    true_labels = []
+    correct = 0
+    loss = 0
+    accuracy = 0
+    for data in loader:  # Iterate in batches over the training/test dataset.
+        if gnn == 'gcn':
+            out = model(data.x, data.edge_index, data.batch, data.edge_weight)  # Perform a single forward pass.
+        elif gnn == 'gin' or 'gcn_noedge':
+            out = model(data.x, data.edge_index, data.batch)
+        loss += criterion(out, data.y.long()) / len(loader)
+        pred = out.argmax(dim=1)  # Use the class with highest probability.
+        predicted_labels.extend(pred.tolist())
+        true_labels.extend(data.y.long().tolist())
+        correct += int((pred == data.y.long()).sum())  # Check against ground-truth labels.
+        accuracy = correct / len(loader.dataset)
+        accuracy_list.append(accuracy)
 
-     for data in loader:  # Iterate in batches over the training/test dataset.
-         if gnn == 'gcn':
-             out = model(data[0].x, data[0].edge_index, data[0].batch, data[0].edge_weight)  # Perform a single forward pass.
-         elif gnn == 'gin' or 'gcn_noedge':
-             out = model(data[0].x, data[0].edge_index, data[0].batch)
-         loss += criterion(out, data[0].y.long()) / len(loader)
-         pred = out.argmax(dim=1)  # Use the class with highest probability.
-         predicted_labels.extend(pred.tolist())
-         true_labels.extend(data[0].y.long().tolist())
-         correct += int((pred == data[0].y.long()).sum())  # Check against ground-truth labels.
-         accuracy = correct / len(dataset_test_dataloader)
-         accuracy_list.append(accuracy)
+    return accuracy, loss, predicted_labels, true_labels  # Derive ratio of correct predictions.
 
-     return accuracy, loss, predicted_labels, true_labels  # Derive ratio of correct predictions.
 
-def buildAndShowConfusionMatrix(true_labels,predicted_labels,gnn):
+def buildAndShowConfusionMatrix(true_labels, predicted_labels, gnn):
     class_labels = ["Morphed", "Bonafide"]
     # change font dict inside confusion matrix
     number_font_dict = {
@@ -214,8 +211,9 @@ def buildAndShowConfusionMatrix(true_labels,predicted_labels,gnn):
     plt.title('GCN', fontdict=title_font_dict)
 
     # Save the plt graphic as image
-    plt.savefig("/Users/Giuseppe Basile/Desktop/New_Morphing/models/" + gnn + "_binary_matrix.png" )
+    plt.savefig('/Users/Giuseppe Basile/Desktop/New_Morphing/models/' + gnn + '_128SizeOpencv_Binary_model.png')
     plt.show()
+
 
 def load_dataloader(filename):
     path = "/Users/Giuseppe Basile/Desktop/New_Morphing/dataloaders/" + filename + ".pt"
@@ -223,30 +221,30 @@ def load_dataloader(filename):
     print(f"Dataloader {filename} loaded")
     return loader
 
-#start function used to begin the training phase
-def start (gnn,epochs,learningRate,save):
+
+# start function used to begin the training phase
+def start(gnn, epochs, learningRate, save):
     test_loader = load_dataloader("TestDataloadermorph_opencv")
-    train_loader = load_dataloader("TrainDataloader")
+    train_loader = load_dataloader("TrainDataloader_128Size")
 
     # checks on the type of model
-    if gnn=='gcn':
-        model = GCN(dim_h=64,num_node_features=2,num_classes=2)
-    elif gnn=='gin':
-        model = GIN(dim_h=64,num_node_features=2,num_classes=2)
-    elif gnn == 'gin' or gnn == 'gcn_noedge':
+    if gnn == 'gcn':
+        model = GCN(dim_h=64, num_node_features=2, num_classes=2)
+    elif gnn == 'gin':
+        model = GIN(dim_h=64, num_node_features=2, num_classes=2)
+    elif gnn == 'gcn_noedge':
         model = GCN_NOEDGE(dim_h=64, num_node_features=2, num_classes=2)
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=learningRate) #lr=0.0001
+    optimizer = torch.optim.Adam(model.parameters(), lr=learningRate)  # lr=0.0001
     criterion = torch.nn.CrossEntropyLoss()
 
     for epoch in range(1, epochs):
-
-        model,total_loss=train(model,train_loader,gnn,optimizer,criterion)
-        train_acc,train_loss,_,_ = test(model,train_loader,gnn,criterion)
-        test_acc,test_loss,predicted_labels,true_labels = test(model,test_loader,gnn,criterion)
-        if (epoch % 10 == 0):
-            print(f'Epoch: {epoch:03d}, Train Loss: {total_loss:.2f},Train Acc: {train_acc:.4f}')
-
+        model, total_loss = train(model, train_loader, gnn, optimizer, criterion)
+        train_acc, train_loss, _, _ = test(model, train_loader, gnn, criterion)
+        test_acc, test_loss, predicted_labels, true_labels = test(model, test_loader, gnn, criterion)
+        print(f'Epoch: {epoch:03d}, Train Loss: {total_loss:.2f},Train Acc: {train_acc:.4f}')
+        # if (epoch % 10 == 0):
+        #     print(f'Epoch: {epoch:03d}, Train Loss: {total_loss:.2f},Train Acc: {train_acc:.4f}')
     # plot confusion matrix
     buildAndShowConfusionMatrix(true_labels, predicted_labels, gnn)
 
@@ -258,11 +256,18 @@ def start (gnn,epochs,learningRate,save):
     f1 = f1_score(true_labels, predicted_labels)
 
     print(f'Precision: {precision:.4f}, Recall: {recall:.4f}, F1-Score: {f1:.4f}')
-    #print(f'True labels: {true_labels}, Predicted labels: {predicted_labels}')
+
     # save the trained model
-    if save==True:
-        torch.save(model.state_dict(), "/Users/Giuseppe Basile/Desktop/New_Morphing/models/" + gnn + "_Binary_model.pth")
+    if save == True:
+        torch.save(model.state_dict(),
+                   '/Users/Giuseppe Basile/Desktop/New_Morphing/models/' + gnn + '_128SizeOpencv_Binary_model.pth')
 
-
-
-start('gcn',100,0.001,True) #150 epoche gin
+# start('gcn', 6, 0.001, True)  # 150 epoche gin
+# print(f"Is CUDA supported by this system? {torch.cuda.is_available()}")
+# print(f"CUDA version: {torch.version.cuda}")
+#
+# # Storing ID of current CUDA device
+# cuda_id = torch.cuda.current_device()
+# print(f"ID of current CUDA device:{torch.cuda.current_device()}")
+#
+# print(f"Name of current CUDA device:{torch.cuda.get_device_name(cuda_id)}")

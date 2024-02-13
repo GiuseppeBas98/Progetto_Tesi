@@ -2,11 +2,12 @@ import cv2
 import os
 from Windows.Build import mediapipeMesh as mp
 import torch
+# from torch.utils.data import DataLoader
+from torch_geometric.data import Dataset
 import torch_geometric.data as data
-from torch.utils.data import Dataset
-# import tensorflow as tf
 import psutil
 from torch_geometric.loader import DataLoader
+from tqdm import tqdm
 
 train = 0
 test = 0
@@ -105,11 +106,8 @@ distType = "manhattan"
 num_grafico = 0
 
 
-
 def print_memory_usage():
     print(f"Memory Usage: {psutil.virtual_memory().percent}%")
-
-
 
 
 def colleziona_grafo(dir_path):
@@ -117,7 +115,8 @@ def colleziona_grafo(dir_path):
     global num_grafico
     global noneGraphs
     global distType
-    for filename in os.listdir(dir_path):
+    file_list = os.listdir(dir_path)
+    for filename in tqdm(file_list, desc="Elaborazione Immagini"):
         percorso_immagine = os.path.join(dir_path, filename)
         if os.path.isfile(percorso_immagine) and filename.lower().endswith(('.png', '.jpg', '.jpeg')):
             num_grafico += 1
@@ -131,23 +130,20 @@ def colleziona_grafo(dir_path):
                 continue
 
             subject = foto_name
-            if subject not in subjectsTrain:
-                subjectsTrain.append(subject)
+            # if subject not in subjectsTrain:
+            #     subjectsTrain.append(subject)
 
             label = 'bonafide'
             grafo = graph2Data(graph, label)
-            print(grafo.y)
-            array.append((grafo, subject))
+            array.append(grafo)
 
-            print_memory_usage()
-            print(f"Total Subjects: {len(subjectsTrain)}")
-            print(len(array))
+            # addGraph(grafo, subject)
+            # print_memory_usage()
+            # print(f"Total Subjects: {len(subjectsTrain)}")
+            # print(len(array))
 
 
-def image_generator_morphed():
-    # for dir_path in dir_paths:
-    # print(f"\nProcessing images in folder: {dir_path}")
-    # if dir_path == r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\datasets\SMDD_dataset\m15k_t\SubFolder_Morphed_1":
+def image_generator_bonafide():
     with open("Cartella.txt", "r") as file:
         dir_path = file.read()
     print("Analizzo foto in Cartella: " + dir_path)
@@ -156,7 +152,7 @@ def image_generator_morphed():
 
 # METODO PER LA REALIZZAZIONE DEL SET DI TRAINING E TESTING PER IMMAGINI MORPHATE
 def beginLoopTrain():
-    image_generator_morphed()
+    image_generator_bonafide()
     crea_dataLoader()
 
 
@@ -169,7 +165,7 @@ def create_dataloader(dataset, batch_size):
 
 
 def save_dataloader(loader, filename):
-    path = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\dataloaders\\" + filename + ".pt"
+    path = "/Users/Giuseppe Basile/Desktop/New_Morphing/dataloaders/" + filename + ".pt"
     torch.save(loader, path)
     print(f"Dataloader {filename} saved")
 
@@ -183,42 +179,37 @@ def load_dataloader(filename):
 
 def crea_dataLoader():
     global array
-    path_dataloader_daEliminare = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\dataloaders\TrainDataloader.pt"
+    path_dataloader_daEliminare = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\dataloaders\TrainDataloader_128Size.pt"
 
     # Verifica se il file esiste
     if os.path.exists(path_dataloader_daEliminare):
         # Se il file esiste, sovrascrivi il dataloader e salva
-        data_loader = load_dataloader('TrainDataloader')
-
+        data_loader = load_dataloader('TrainDataloader_128Size')
         dataset_originale = data_loader.dataset
         print("ARRAY VECCHIO: ")
         print(len(dataset_originale))
 
         array.extend(dataset_originale)
-
         print("ARRAY NUOVO: ")
         print(len(array))
 
         elimina_file_dataloader(path_dataloader_daEliminare)
 
-        data_loader = create_dataloader(array, batch_size=60)
-        save_dataloader(data_loader, 'TrainDataloader')
-        # dataset = data_loader.dataset
-        # print(dataset)
+        dataLoader = create_dataloader(array, batch_size=128)
+        save_dataloader(dataLoader, 'TrainDataloader_128Size')
+        dataset = dataLoader.dataset
+        print("LUNGHEZZA: ")
+        print(len(dataset))
 
     else:
         # Se il file non esiste, crea un nuovo dataloader e salva
-        data_loader = create_dataloader(array, batch_size=60)
-        save_dataloader(data_loader, 'TrainDataloader')
+        data_loader = create_dataloader(array, batch_size=128)
+        save_dataloader(data_loader, 'TrainDataloader_128Size')
         # dataset = data_loader.dataset
         # print(dataset)
 
 
 def elimina_file_dataloader(file_path):
-    # Elimina il DataLoader
-    # del dataloader
-    # print("DataLoader eliminato")
-
     # Elimina il file associato
     try:
         os.remove(file_path)
@@ -227,9 +218,16 @@ def elimina_file_dataloader(file_path):
         print(f"Errore durante l'eliminazione del file: {e}")
 
 
-# beginLoopTrain()
-d = load_dataloader('TrainDataloader')
-#dset = d.dataset
-for data in d:
-#    print("Data: ")
-    print(data[0].y)
+def main():
+    beginLoopTrain()
+    # print("ARRAY: " + str(array))
+    # d = load_dataloader('TrainDataloader_128Size')
+    # dset = d.dataset
+    # print(str(len(d)))
+    # count = 0
+    # print("STAMPO DATALOADER: ")
+    # for data in d:
+    #     print(data.y)
+
+if __name__ == "__main__":
+    main()

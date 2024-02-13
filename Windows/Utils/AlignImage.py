@@ -38,7 +38,7 @@ def detectFace(img):
 def alignFace(img_path):
     img = cv2.imread(img_path)
     plt.imshow(img[:, :, ::-1])
-    #plt.show()
+    # plt.show()
 
     img_raw = img.copy()
 
@@ -160,20 +160,14 @@ nose_detector = cv2.CascadeClassifier(nose_detector_path)
 
 test_set = ["D:\PiscopoRoberto\FER\CK+\surprise\S034_001_00000029"]
 
-
-
-
-
 distType = "manhattan"
 
-for instance in test_set:
-    image = cv2.imread(instance)
-    alignedFace = alignFace(instance)
-    #plt.imshow(alignedFace[:, :, ::-1])
-    #plt.show()
-
-    img, gray_img = detectFace(alignedFace)
-    plt.imshow(img[:, :, ::-1])
-    plt.show()
-
-
+# for instance in test_set:
+#     image = cv2.imread(instance)
+#     alignedFace = alignFace(instance)
+#     # plt.imshow(alignedFace[:, :, ::-1])
+#     # plt.show()
+#
+#     img, gray_img = detectFace(alignedFace)
+#     plt.imshow(img[:, :, ::-1])
+#     plt.show()

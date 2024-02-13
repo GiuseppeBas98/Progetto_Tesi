@@ -7,6 +7,7 @@ from torch.utils.data import Dataset
 # import tensorflow as tf
 import psutil
 from torch_geometric.loader import DataLoader
+from tqdm import tqdm
 
 train = 0
 test = 0
@@ -112,20 +113,22 @@ def print_memory_usage():
 
 
 def colleziona_grafo(dir_path):
-    num_grafico = 0
+    global array
+    global num_grafico
+    global noneGraphs
     global distType
-    for filename in os.listdir(dir_path):
+    file_list = os.listdir(dir_path)
+    for filename in tqdm(file_list, desc="Elaborazione Immagini"):
         percorso_immagine = os.path.join(dir_path, filename)
         if os.path.isfile(percorso_immagine) and filename.lower().endswith(('.png', '.jpg', '.jpeg')):
             num_grafico += 1
-            num_graph = 0
             foto_name = percorso_immagine.split(os.path.sep)[-1]
             img = cv2.imread(percorso_immagine)
             graph = mp.buildGraphNorm(img, distType)
 
             if graph is None:
-                none_graphs = 1
-                print(f"\n Null graph index: {num_graph} , number of null graphs: {none_graphs}")
+                noneGraphs += 1
+                print(f"\n Null graph index: {num_grafico} , number of null graphs: {noneGraphs}")
                 continue
 
             subject = foto_name
@@ -134,32 +137,11 @@ def colleziona_grafo(dir_path):
 
             label = 'morphed'
             grafo = graph2Data(graph, label)
-            '''
-            x=torch.tensor(grafo.x.shape)
-            edgeW = torch.tensor(grafo.edge_weight.shape)
-            edgeI = torch.tensor(grafo.edge_index.shape)
-            y = grafo.y
-            dataGrafo = DataGrafo(subject, x, edgeW, edgeI, y)
-            '''
-
-            array.append((grafo, subject))
-
-            # Chiamare la funzione per salvare il dato nel file
-            # save_to_txt(subject, x, edgeW, edgeI, y)
-            # print(grafo)
-
-            # Stampiamo alcune informazioni sulla memoria
-
-            print_memory_usage()
-            print(f"Total Subjects: {len(subjectsTrain)}")
-            print(len(array))
+            array.append(grafo)
 
 
 def image_generator():
     global nome_cartella
-    # for dir_path in dir_paths:
-    # print(f"\nProcessing images in folder: {dir_path}")
-    # if dir_path == r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\datasets\SMDD_dataset\m15k_t\SubFolder_Morphed_1":
     with open("CartellaTest.txt", "r") as file:
         dir_path = file.read()
     print("Analizzo foto in Cartella: " + dir_path)
@@ -184,7 +166,7 @@ def create_dataloader(dataset, batch_size):
 
 
 def save_dataloader(loader, filename):
-    path = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\dataloaders\\" + filename + ".pt"
+    path = "/Users/Giuseppe Basile/Desktop/New_Morphing/dataloaders/" + filename + ".pt"
     torch.save(loader, path)
     print(f"Dataloader {filename} saved")
 
@@ -215,11 +197,20 @@ def elimina_file_dataloader(file_path):
 
 
 beginLoopTest()
-print(array)
-d = load_dataloader('TestDataLoaderprovsa')
-#dset1 = d_amsl.dataset
-#print("SET AMSL: ")
-#print(len(dset1))
-for data in d:
-    print(data)
+# d = load_dataloader('TestDataloadermorph_opencv')
+# dset = d.dataset
+# print(str(len(d)) + "   " + str(len(dset)))
+# print("STAMPO DATALOADER: ")
+# for data in d:
+#     print(data)
 
+# print(array)
+# d = load_dataloader('TestDataLoaderprovsa')
+# dset1 = d_amsl.dataset
+# print("SET AMSL: ")
+# print(len(d))
+# for data in d:
+#     print(data[0].y)
+# per = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\prova\provsa\001_016.jpg"
+# img = cv2.imread(per)
+# mp.showGraph(img, distType)

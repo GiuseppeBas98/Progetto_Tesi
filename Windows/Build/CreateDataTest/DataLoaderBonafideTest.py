@@ -7,6 +7,7 @@ from torch.utils.data import Dataset
 # import tensorflow as tf
 import psutil
 from torch_geometric.loader import DataLoader
+from tqdm import tqdm
 
 train = 0
 test = 0
@@ -103,8 +104,6 @@ subjectsTest = []
 noneGraphs = 0
 distType = "manhattan"
 num_grafico = 0
-file_name = "../pisello.py.txt"
-file_path = r"/Windows/Build/graph2TrainDataMANHATTAN.txt"
 nome_cartella = ""
 
 def print_memory_usage():
@@ -112,20 +111,22 @@ def print_memory_usage():
 
 
 def colleziona_grafo(dir_path):
-    num_grafico = 0
+    global array
+    global num_grafico
+    global noneGraphs
     global distType
-    for filename in os.listdir(dir_path):
+    file_list = os.listdir(dir_path)
+    for filename in tqdm(file_list, desc="Elaborazione Immagini"):
         percorso_immagine = os.path.join(dir_path, filename)
         if os.path.isfile(percorso_immagine) and filename.lower().endswith(('.png', '.jpg', '.jpeg')):
             num_grafico += 1
-            num_graph = 0
             foto_name = percorso_immagine.split(os.path.sep)[-1]
             img = cv2.imread(percorso_immagine)
             graph = mp.buildGraphNorm(img, distType)
 
             if graph is None:
-                none_graphs = 1
-                print(f"\n Null graph index: {num_graph} , number of null graphs: {none_graphs}")
+                noneGraphs += 1
+                print(f"\n Null graph index: {num_grafico} , number of null graphs: {noneGraphs}")
                 continue
 
             subject = foto_name
@@ -134,25 +135,7 @@ def colleziona_grafo(dir_path):
 
             label = 'bonafide'
             grafo = graph2Data(graph, label)
-            '''
-            x=torch.tensor(grafo.x.shape)
-            edgeW = torch.tensor(grafo.edge_weight.shape)
-            edgeI = torch.tensor(grafo.edge_index.shape)
-            y = grafo.y
-            dataGrafo = DataGrafo(subject, x, edgeW, edgeI, y)
-            '''
-
-            array.append((grafo, subject))
-
-            # Chiamare la funzione per salvare il dato nel file
-            # save_to_txt(subject, x, edgeW, edgeI, y)
-            # print(grafo)
-
-            # Stampiamo alcune informazioni sulla memoria
-
-            print_memory_usage()
-            print(f"Total Subjects: {len(subjectsTrain)}")
-            print(len(array))
+            array.append(grafo)
 
 
 def image_generator():
@@ -162,9 +145,11 @@ def image_generator():
     # if dir_path == r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\datasets\SMDD_dataset\m15k_t\SubFolder_Morphed_1":
     with open("CartellaTest.txt", "r") as file:
         dir_path_nome = file.read()
-    dir_path = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\datasets\FRLL_dataset\FRLL_bonafide\neutral_front"
+
+    dir_path = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\datasets\FRLL_dataset\FRLL_bonafide"
     print("Analizzo foto in Cartella: " + dir_path)
     colleziona_grafo(dir_path)
+
     nome_cartella = os.path.basename(dir_path_nome)
     print("QUESTO è IL NOME CHE AVRà IL DATALOADER: ")
     print(nome_cartella)
@@ -200,7 +185,7 @@ def load_dataloader(filename):
 def crea_dataLoader():
     global array
     global nome_cartella
-    path_dataloader_daEliminare = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\dataloaders\TestDataLoader" + nome_cartella + ".pt"
+    path_dataloader_daEliminare = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\dataloaders\TestDataloader" + nome_cartella + ".pt"
     print("STO NELLA FUNZIONE DI CREA DATALOADER BONAFIDE. QUESTO è IL PATH DEL FILE CHE DEVO SOVRASCRIVERE INSERENDO I BONAFIDE: ")
     print(path_dataloader_daEliminare)
     print("STO NELLA FUNZIONE DI CREA DATALOADER BONAFIDE. QUESTO è IL NOME DELLA CARTELLA DEI DATI MORPHED: ")
@@ -208,13 +193,13 @@ def crea_dataLoader():
     # Verifica se il file esiste
     if os.path.exists(path_dataloader_daEliminare):
         # Se il file esiste, sovrascrivi il dataloader e salva
-        data_loader = load_dataloader('TestDataLoader' + nome_cartella)
+        data_loader = load_dataloader('TestDataloader' + nome_cartella)
 
         dataset_originale = data_loader.dataset
         print("ARRAY VECCHIO: ")
         print(len(dataset_originale))
 
-        array.extend(dataset_originale)
+        array += dataset_originale
 
         print("ARRAY NUOVO: ")
         print(len(array))
@@ -222,7 +207,7 @@ def crea_dataLoader():
         elimina_file_dataloader(path_dataloader_daEliminare)
 
         data_loader = create_dataloader(array, batch_size=60)
-        save_dataloader(data_loader, 'TestDataLoader' + nome_cartella)
+        save_dataloader(data_loader, 'TestDataloader' + nome_cartella)
         #dataset = data_loader.dataset
         #print("LUNGHEZZA: ")
         #print(len(dataset))

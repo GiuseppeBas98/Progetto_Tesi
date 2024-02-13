@@ -62,7 +62,7 @@ def showGraph(image, a):
         # cv2.putText(image, str(faceLandmark), nodesPositions[faceLandmark], 0, 0.2, (255,0,0))
 
     cv2.imshow("image", image)
-    #cv2.waitKey(0)
+    # cv2.waitKey(0)
 
 
 def buildGraph(image, distType):
@@ -141,49 +141,6 @@ def computeRicciCurvature(graph):
     ricci_curvature.compute_ricci_curvature()
     return ricci_curvature
 
-
-
-def buildGraphNormOllivierCurvature(image, distType):
-    height, width, _ = image.shape
-    faceModule = mediapipe.solutions.face_mesh
-    processedImage = faceModule.FaceMesh(static_image_mode=True).process(image)
-    if (processedImage.multi_face_landmarks is None):
-        return
-
-    graph = networkx.Graph()
-
-    lista_norm = []
-    # Adds node to the graph
-    for faceLandmark in FACE_LANDMARKS:
-        # print("have this landmark!!! HYA!!" + landmark)
-        landmark = processedImage.multi_face_landmarks[0].landmark[faceLandmark]
-        # print('faceLandmark', faceLandmark)
-        lista_norm.append(landmark)
-        # print('landmark', landmark)
-        pos = (int(landmark.x * width), int(landmark.y * height))
-        graph.add_node(faceLandmark, pos=pos)
-
-    nodesPosition = networkx.get_node_attributes(graph, "pos")
-    # Adds edges to the graph
-    for faceEdge in FACEMESH_TESSELATION:
-
-        # Calculates the distance
-        if distType == "manhattan":
-            weight = distance.cityblock(
-                [lista_norm[faceEdge[0]].x, lista_norm[faceEdge[0]].y, lista_norm[faceEdge[0]].z],
-                [lista_norm[faceEdge[1]].x, lista_norm[faceEdge[1]].y, lista_norm[faceEdge[1]].z])
-
-        # If the weight is equal to 0 adds a near null value
-        if (weight != 0):
-            graph.add_edge(faceEdge[0], faceEdge[1], weight=weight)
-        else:
-            graph.add_edge(faceEdge[0], faceEdge[1], weight=0.001)
-
-
-    ricci_curvature = OllivierRicci(graph, alpha=0.5, verbose="TRACE")
-    ricci_curvature.compute_ricci_curvature()
-    show_results(graph)
-    return ricci_curvature
 
 
 # Builds complete graph

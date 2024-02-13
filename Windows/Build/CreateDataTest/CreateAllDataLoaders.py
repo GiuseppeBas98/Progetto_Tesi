@@ -6,7 +6,7 @@ def esegui_file(file_path):
     os.system(f"python {file_path}")
 
 def main():
-    percorso_cartella = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\datasets\FRLL_dataset\FRLL-Morphs\facelab_london"
+    percorso_cartella = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\datasets\FRLL_dataset\FRLL-Morphs"
     # foldername contiene il percorso completo della sottocartella corrente
     # subfolders contiene una lista di sottocartelle nella cartella corrente
     # Verifica se ci sono sottocartelle
