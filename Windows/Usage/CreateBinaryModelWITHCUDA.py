@@ -110,17 +110,66 @@ class GIN(torch.nn.Module):
         return x
 
 
-def train(model, train_loader, gnn, optimizer, criterion):
+# def train(model, train_loader, gnn, optimizer, criterion):
+#     total_loss = 0
+#     acc = 0
+#     index = 0
+#     global count, iteration_list, loss_list
+#     model.train()
+#
+#     # Sposta il modello sulla GPU se CUDA è disponibile
+#     if torch.cuda.is_available():
+#         model = model.to('cuda')
+#
+#     # Iterate in batches over the training dataset.
+#     for data in train_loader:
+#         index += 1
+#         count += 1
+#
+#         # Sposta i dati sulla GPU se CUDA è disponibile
+#         if torch.cuda.is_available():
+#             data.x, data.edge_index, data.batch, data.edge_weight, data.y = \
+#                 data.x.to('cuda'), data.edge_index.to('cuda'), data.batch.to('cuda'), data.edge_weight.to(
+#                     'cuda'), data.y.to('cuda')
+#
+#         if gnn == 'gcn':
+#             out = model(data.x, data.edge_index, data.batch, data.edge_weight)
+#         elif gnn == 'gin' or gnn == 'gcn_noedge':
+#             out = model(data.x, data.edge_index, data.batch)
+#
+#         loss = criterion(out, data.y.long())
+#         total_loss += loss / len(train_loader)
+#         loss.backward()
+#         optimizer.step()
+#         optimizer.zero_grad()
+#
+#         iteration_list.append(count)
+#         loss_list.append(loss.item())
+#
+#     return model, total_loss
+
+def train(model, train_loader, val_loader, gnn, optimizer, criterion):
     total_loss = 0
     acc = 0
     index = 0
     global count, iteration_list, loss_list
     model.train()
 
+    # Sposta il modello sulla GPU se CUDA è disponibile
+    if torch.cuda.is_available():
+        model = model.to('cuda')
+
     # Iterate in batches over the training dataset.
     for data in train_loader:
         index += 1
         count += 1
+
+        # Sposta i dati sulla GPU se CUDA è disponibile
+        if torch.cuda.is_available():
+            data.x, data.edge_index, data.batch, data.edge_weight, data.y = \
+                data.x.to('cuda'), data.edge_index.to('cuda'), data.batch.to('cuda'), data.edge_weight.to(
+                    'cuda'), data.y.to('cuda')
+
         if gnn == 'gcn':
             out = model(data.x, data.edge_index, data.batch, data.edge_weight)  # Perform a single forward pass.
         elif gnn == 'gin' or 'gcn_noedge':
@@ -133,7 +182,27 @@ def train(model, train_loader, gnn, optimizer, criterion):
 
         iteration_list.append(count)
         loss_list.append(loss.item())  # Use item() to get the scalar value of the loss
-    return model, total_loss
+
+    # Validation loss without parameter update
+    val_loss = 0
+    model.eval()
+    with torch.no_grad():
+        for val_data in val_loader:
+            if torch.cuda.is_available():
+                val_data.x, val_data.edge_index, val_data.batch, val_data.edge_weight, val_data.y = \
+                    val_data.x.to('cuda'), val_data.edge_index.to('cuda'), val_data.batch.to(
+                        'cuda'), val_data.edge_weight.to(
+                        'cuda'), val_data.y.to('cuda')
+
+            if gnn == 'gcn':
+                val_out = model(val_data.x, val_data.edge_index, val_data.batch, val_data.edge_weight)
+            elif gnn == 'gin' or 'gcn_noedge':
+                val_out = model(val_data.x, val_data.edge_index, val_data.batch)
+            val_loss += criterion(val_out, val_data.y.long()) / len(val_loader)
+
+    model.train()
+
+    return model, total_loss, val_loss
 
 
 def test(model, loader, gnn, criterion):
@@ -145,20 +214,35 @@ def test(model, loader, gnn, criterion):
     correct = 0
     loss = 0
     accuracy = 0
-    for data in loader:  # Iterate in batches over the training/test dataset.
-        if gnn == 'gcn':
-            out = model(data.x, data.edge_index, data.batch, data.edge_weight)  # Perform a single forward pass.
-        elif gnn == 'gin' or 'gcn_noedge':
-            out = model(data.x, data.edge_index, data.batch)
-        loss += criterion(out, data.y.long()) / len(loader)
-        pred = out.argmax(dim=1)  # Use the class with highest probability.
-        predicted_labels.extend(pred.tolist())
-        true_labels.extend(data.y.long().tolist())
-        correct += int((pred == data.y.long()).sum())  # Check against ground-truth labels.
+
+    # Sposta il modello sulla GPU se CUDA è disponibile
+    if torch.cuda.is_available():
+        model = model.to('cuda')
+
+    with torch.no_grad():
+        for data in loader:  # Iterate in batches over the training/test dataset.
+            # Sposta i dati sulla GPU se CUDA è disponibile
+            if torch.cuda.is_available():
+                data.x, data.edge_index, data.batch, data.edge_weight, data.y = \
+                    data.x.to('cuda'), data.edge_index.to('cuda'), data.batch.to('cuda'), data.edge_weight.to(
+                        'cuda'), data.y.to('cuda')
+
+            if gnn == 'gcn':
+                out = model(data.x, data.edge_index, data.batch, data.edge_weight)
+            elif gnn == 'gin' or gnn == 'gcn_noedge':
+                out = model(data.x, data.edge_index, data.batch)
+
+            loss += criterion(out, data.y.long()).item() / len(loader)
+            pred = out.argmax(dim=1)  # Use the class with highest probability.
+            predicted_labels.extend(pred.cpu().tolist())  # Sposta le predizioni sulla CPU per l'estensione della lista
+            true_labels.extend(data.y.long().cpu().tolist())  # Sposta le etichette reali sulla CPU
+            correct += int((pred == data.y.long()).sum())  # Check against ground-truth labels.
+
         accuracy = correct / len(loader.dataset)
         accuracy_list.append(accuracy)
 
-    return accuracy, loss, predicted_labels, true_labels  # Derive ratio of correct predictions.
+    return accuracy, loss, predicted_labels, true_labels
+
 
 def buildAndShowConfusionMatrix(true_labels, predicted_labels, gnn):
     class_labels = ["Morphed", "Bonafide"]
@@ -210,7 +294,7 @@ def buildAndShowConfusionMatrix(true_labels, predicted_labels, gnn):
     plt.title('GCN', fontdict=title_font_dict)
 
     # Save the plt graphic as image
-    plt.savefig('/Users/Giuseppe Basile/Desktop/New_Morphing/models/' + gnn + '_128SizeOpencv_Binary_model.png')
+    plt.savefig('/Users/Giuseppe Basile/Desktop/New_Morphing/models/' + gnn + '_CUDA60SizeOpencv_Binary_model.png')
     plt.show()
 
 
@@ -223,8 +307,9 @@ def load_dataloader(filename):
 
 # start function used to begin the training phase
 def start(gnn, epochs, learningRate, save):
-    test_loader = load_dataloader("TestDataloadermorph_opencv")
-    train_loader = load_dataloader("TrainDataloader_128Size")
+    test_loader = load_dataloader("TestDataloadermorph_facemorpher")
+    train_loader = load_dataloader("TrainDataloader")
+    val_loader = load_dataloader('TestDataloadermorph_amsl')
 
     # checks on the type of model
     if gnn == 'gcn':
@@ -238,12 +323,13 @@ def start(gnn, epochs, learningRate, save):
     criterion = torch.nn.CrossEntropyLoss()
 
     for epoch in range(1, epochs):
-        model, total_loss = train(model, train_loader, gnn, optimizer, criterion)
+        model, total_loss, val_loss = train(model, train_loader, val_loader, gnn, optimizer, criterion)
         train_acc, train_loss, _, _ = test(model, train_loader, gnn, criterion)
+        val_acc, val_loss, _, _ = test(model, val_loader, gnn, criterion)  # Valutazione sul set di validazione
         test_acc, test_loss, predicted_labels, true_labels = test(model, test_loader, gnn, criterion)
-        print(f'Epoch: {epoch:03d}, Train Loss: {total_loss:.2f},Train Acc: {train_acc:.4f}')
-        # if (epoch % 10 == 0):
-        #     print(f'Epoch: {epoch:03d}, Train Loss: {total_loss:.2f},Train Acc: {train_acc:.4f}')
+        # print(f'Epoch: {epoch:03d}, Train Loss: {total_loss:.2f},Train Acc: {train_acc:.4f}')
+        if (epoch % 10 == 0):
+            print(f'Epoch: {epoch:03d}, Train Loss: {total_loss:.2f},Train Acc: {train_acc:.4f},Val Acc: {val_acc:.4f}')
     # plot confusion matrix
     buildAndShowConfusionMatrix(true_labels, predicted_labels, gnn)
 
@@ -259,8 +345,10 @@ def start(gnn, epochs, learningRate, save):
     # save the trained model
     if save == True:
         torch.save(model.state_dict(),
-                   '/Users/Giuseppe Basile/Desktop/New_Morphing/models/' + gnn + '_128SizeOpencv_Binary_model.pth')
+                   '/Users/Giuseppe Basile/Desktop/New_Morphing/models/' + gnn + '_CUDA60SizeOpencv_Binary_model.pth')
 
+
+#
 # # Verifica se CUDA è disponibile
 # if torch.cuda.is_available():
 #     # Stampa le informazioni sulla versione di CUDA
@@ -272,4 +360,10 @@ def start(gnn, epochs, learningRate, save):
 # else:
 #     print("CUDA non è disponibile. Verifica l'installazione di CUDA e PyTorch con CUDA.")
 
-# start('gcn', 6, 0.001, True)  # 150 epoche gin
+def main():
+    # print(torch.__version__)
+    start('gcn', 20, 0.001, True)  # 150 epoche gin
+
+
+if __name__ == "__main__":
+    main()

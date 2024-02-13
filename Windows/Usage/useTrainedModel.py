@@ -51,7 +51,7 @@ def startClassification(gnn, image):
 
     # Path to the trained weights
     # path = "/Users/Giuseppe Basile/Desktop/New_Morphing/models/" + gnn + bin + "_model_.pth"
-    path = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\models\gcn_128SizeOpencv_Binary_model.pth"
+    path = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\models\gcn_CUDA60SizeOpencv_Binary_model.pth"
     print(path)
 
     # Load trained weights into the model
@@ -96,14 +96,14 @@ def startClassification(gnn, image):
     cv2.destroyAllWindows()
 
 
-# alignedFace = AlignImage.alignFace("/Users/Giuseppe Basile/Desktop/New_Morphing/ImageTesting/img000001_B.png")
+# alignedFace = AlignImage.alignFace("/Users/Giuseppe Basile/Desktop/New_Morphing/imageTesting/img000001_B.png")
 # image, gray_img = AlignImage.detectFace(alignedFace)
 # plt.imshow(image[:, :, ::-1])
 # plt.show()
-# img = cv2.imread("/Users/Giuseppe Basile/Desktop/New_Morphing/ImageTesting/img000001_B.png")
+# img = cv2.imread("/Users/Giuseppe Basile/Desktop/New_Morphing/imageTesting/img000001_B.png")
 # startClassification('gcn', image)
 
-dir_path = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\ImageTesting"
+dir_path = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\imageTesting"
 for filename in os.listdir(dir_path):
     percorso_immagine = os.path.join(dir_path, filename)
     # alignedFace = AlignImage.alignFace(percorso_immagine)
