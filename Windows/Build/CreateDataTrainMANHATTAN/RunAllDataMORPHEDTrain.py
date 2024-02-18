@@ -14,7 +14,7 @@ def main():
             file.truncate(0)  # Elimina il contenuto esistente
             file.write(percorso_cartella)
 
-        esegui_file("DataLoaderMorphedTrain.py")
+        esegui_file("DataLoaderMorphedTrainCUDA.py")
         print("Fine 2k Foto.\nAttendi 15sec prima che le prossime 2k foto vengono eseguite... :)")
         time.sleep(15)  # Ritardo di 20 secondi tra le esecuzioni
 

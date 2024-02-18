@@ -51,7 +51,7 @@ def startClassification(gnn, image):
 
     # Path to the trained weights
     # path = "/Users/Giuseppe Basile/Desktop/New_Morphing/models/" + gnn + bin + "_model_.pth"
-    path = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\models\gcn_CUDA60SizeOpencv_Binary_model.pth"
+    path = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\models\gcn_CUDA128SizeOpencvFacemorpher_Binary_model.pth"
     print(path)
 
     # Load trained weights into the model
