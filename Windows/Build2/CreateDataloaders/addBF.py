@@ -88,16 +88,6 @@ def graph2Data(graph, type):
     return graph
 
 
-def addGraph(graph, subject):
-    global total_data
-    global tot
-
-    total_data.append((graph, subject))
-    tot += 1
-    # print(f"\nTotal Data: {tot}")
-    # print(total_data)
-
-
 array = []
 subjectsTrain = []
 subjectsTest = []
@@ -129,22 +119,12 @@ def colleziona_grafo(dir_path):
                 print(f"\n Null graph index: {num_grafico} , number of null graphs: {noneGraphs}")
                 continue
 
-            subject = foto_name
-            # if subject not in subjectsTrain:
-            #     subjectsTrain.append(subject)
-
-            label = 'morphed'
+            label = 'bonafide'
             grafo = graph2Data(graph, label)
             array.append(grafo)
 
-            # addGraph(grafo, subject)
-            # print_memory_usage()
-            # print(f"Total Subjects: {len(subjectsTrain)}")
-            # print(len(array))
-
-
-def image_generator_morphed():
-    with open("Cartella.txt", "r") as file:
+def image_generator_bonafide():
+    with open("CartellaMerged.txt", "r") as file:
         dir_path = file.read()
     print("Analizzo foto in Cartella: " + dir_path)
     colleziona_grafo(dir_path)
@@ -152,7 +132,7 @@ def image_generator_morphed():
 
 # METODO PER LA REALIZZAZIONE DEL SET DI TRAINING E TESTING PER IMMAGINI MORPHATE
 def beginLoopTrain():
-    image_generator_morphed()
+    image_generator_bonafide()
     crea_dataLoader()
 
 
@@ -165,13 +145,13 @@ def create_dataloader(dataset, batch_size):
 
 
 def save_dataloader(loader, filename):
-    path = "/Users/Giuseppe Basile/Desktop/New_Morphing/dataloaders/" + filename + ".pt"
+    path = "/Users/Giuseppe Basile/Desktop/New_Morphing/dataloadersMerged/" + filename + ".pt"
     torch.save(loader, path)
     print(f"Dataloader {filename} saved")
 
 
 def load_dataloader(filename):
-    path = "/Users/Giuseppe Basile/Desktop/New_Morphing/dataloaders/" + filename + ".pt"
+    path = "/Users/Giuseppe Basile/Desktop/New_Morphing/dataloadersMerged/" + filename + ".pt"
     loader = torch.load(path)
     print(f"Dataloader {filename} loaded")
     return loader
@@ -179,19 +159,19 @@ def load_dataloader(filename):
 
 def crea_dataLoader():
     global array
-    path_dataloader_daEliminare = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\dataloaders\TrainDataloader_128Size.pt"
+    path_dataloader_daEliminare = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\dataloadersMerged\TrainDataloader_128Size.pt"
 
     # Verifica se il file esiste
     if os.path.exists(path_dataloader_daEliminare):
         # Se il file esiste, sovrascrivi il dataloader e salva
         data_loader = load_dataloader('TrainDataloader_128Size')
         dataset_originale = data_loader.dataset
-        print("ARRAY VECCHIO: ")
-        print(len(dataset_originale))
+        # print("ARRAY VECCHIO: ")
+        # print(len(dataset_originale))
 
         array.extend(dataset_originale)
-        print("ARRAY NUOVO: ")
-        print(len(array))
+        # print("ARRAY NUOVO: ")
+        # print(len(array))
 
         elimina_file_dataloader(path_dataloader_daEliminare)
 
@@ -219,26 +199,15 @@ def elimina_file_dataloader(file_path):
 
 
 def main():
-    # print(torch.__version__)
-    # beginLoopTrain()
+    beginLoopTrain()
     # print("ARRAY: " + str(array))
-    d = load_dataloader('TrainDataloader_128Size')
-    # d1 = load_dataloader('TestDataloadermorph_opencv')
-    dset = d.dataset
-    # dset1 = d1.dataset
-    count = 0
-    print("STAMPO dataset: ")
-    for data in dset:
-        count += 1
-        print(data)
-        if count > 4:
-            break
-    print("STAMPO DATALOADER: ")
-    for data in d:
-        count += 1
-        print(data)
-        if count > 4:
-            break
+    # d = load_dataloader('TrainDataloader_128Size')
+    # dset = d.dataset
+    # print(str(len(d)))
+    # count = 0
+    # print("STAMPO DATALOADER: ")
+    # for data in d:
+    #     print(data.y)
 
 if __name__ == "__main__":
     main()

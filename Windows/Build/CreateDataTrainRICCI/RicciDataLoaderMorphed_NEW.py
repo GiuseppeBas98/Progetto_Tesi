@@ -122,29 +122,21 @@ def colleziona_grafo(dir_path):
             num_grafico += 1
             foto_name = percorso_immagine.split(os.path.sep)[-1]
             img = cv2.imread(percorso_immagine)
-            graph = mp.buildGraphNorm(img, distType)
-
+            graph = mp.buildOllivierRicciGraph(img, distType)
+            print("dopo ricci")
             if graph is None:
                 noneGraphs += 1
                 print(f"\n Null graph index: {num_grafico} , number of null graphs: {noneGraphs}")
                 continue
 
-            subject = foto_name
-            # if subject not in subjectsTrain:
-            #     subjectsTrain.append(subject)
-
             label = 'morphed'
             grafo = graph2Data(graph, label)
             array.append(grafo)
-
-            # addGraph(grafo, subject)
-            # print_memory_usage()
-            # print(f"Total Subjects: {len(subjectsTrain)}")
-            # print(len(array))
+            print("ho fatto l'append")
 
 
 def image_generator_morphed():
-    with open("Cartella.txt", "r") as file:
+    with open("CartellaRICCI.txt", "r") as file:
         dir_path = file.read()
     print("Analizzo foto in Cartella: " + dir_path)
     colleziona_grafo(dir_path)
@@ -179,12 +171,12 @@ def load_dataloader(filename):
 
 def crea_dataLoader():
     global array
-    path_dataloader_daEliminare = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\dataloaders\TrainDataloader_128Size.pt"
+    path_dataloader_daEliminare = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\dataloaders\TrainDataloaderRICCI_64Size.pt"
 
     # Verifica se il file esiste
     if os.path.exists(path_dataloader_daEliminare):
         # Se il file esiste, sovrascrivi il dataloader e salva
-        data_loader = load_dataloader('TrainDataloader_128Size')
+        data_loader = load_dataloader('TrainDataloaderRICCI_64Size')
         dataset_originale = data_loader.dataset
         print("ARRAY VECCHIO: ")
         print(len(dataset_originale))
@@ -196,7 +188,7 @@ def crea_dataLoader():
         elimina_file_dataloader(path_dataloader_daEliminare)
 
         dataLoader = create_dataloader(array, batch_size=128)
-        save_dataloader(dataLoader, 'TrainDataloader_128Size')
+        save_dataloader(dataLoader, 'TrainDataloaderRICCI_64Size')
         dataset = dataLoader.dataset
         print("LUNGHEZZA: ")
         print(len(dataset))
@@ -204,7 +196,7 @@ def crea_dataLoader():
     else:
         # Se il file non esiste, crea un nuovo dataloader e salva
         data_loader = create_dataloader(array, batch_size=128)
-        save_dataloader(data_loader, 'TrainDataloader_128Size')
+        save_dataloader(data_loader, 'TrainDataloaderRICCI_64Size')
         # dataset = data_loader.dataset
         # print(dataset)
 
@@ -220,25 +212,16 @@ def elimina_file_dataloader(file_path):
 
 def main():
     # print(torch.__version__)
-    # beginLoopTrain()
+    beginLoopTrain()
     # print("ARRAY: " + str(array))
-    d = load_dataloader('TrainDataloader_128Size')
+    # d = load_dataloader('TrainDataloader_128Size')
     # d1 = load_dataloader('TestDataloadermorph_opencv')
-    dset = d.dataset
+    # dset = d.dataset
     # dset1 = d1.dataset
-    count = 0
-    print("STAMPO dataset: ")
-    for data in dset:
-        count += 1
-        print(data)
-        if count > 4:
-            break
-    print("STAMPO DATALOADER: ")
-    for data in d:
-        count += 1
-        print(data)
-        if count > 4:
-            break
+    # print("DSET:" + str(len(dset)))
+    # # print("STAMPO DATALOADER: ")
+    # for data in d:
+    #      print(data)
 
 if __name__ == "__main__":
     main()

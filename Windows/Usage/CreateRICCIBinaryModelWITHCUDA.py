@@ -85,7 +85,7 @@ class GCN_NOEDGE(torch.nn.Module):
 
         # Graph-level readout
         # x = global_add_pool(x, batch)
-        x= global_mean_pool(x,batch)
+        x = global_mean_pool(x, batch)
 
         # Classifier
         x = F.dropout(x, p=0.5, training=self.training)
@@ -320,24 +320,24 @@ def buildAndShowConfusionMatrix(true_labels, predicted_labels, gnn):
 
     # Save the plt graphic as image
     plt.savefig(
-        '/Users/Giuseppe Basile/Desktop/New_Morphing/modelsEquals/' + gnn + name_final_file + '_Binary_model.png')
+        '/Users/Giuseppe Basile/Desktop/New_Morphing/modelsRICCI/' + gnn + name_final_file + '_Binary_model.png')
     plt.show()
 
 
 def load_dataloader(filename):
-    path = "/Users/Giuseppe Basile/Desktop/New_Morphing/dataloadersMerged/" + filename + ".pt"
+    path = "/Users/Giuseppe Basile/Desktop/New_Morphing/dataloaders/RicciDataloaders701515/" + filename + ".pt"
     loader = torch.load(path)
     print(f"Dataloader {filename} loaded")
     return loader
 
 
-name_final_file = '_CUDA128Size'
+name_final_file = '2_CUDA128SizeRICCI7015'
 
 
 # start function used to begin the training phase
 def start(gnn, epochs, learningRate, save, patience):
     global name_final_file
-    name_train_d, name_vale_d, name_test_d = 'TrainDataloader_128Size', 'ValidationDataloader_128Size', 'TestDataloader_128Size'
+    name_train_d, name_vale_d, name_test_d = 'TrainDataloaderRICCI_128Size', 'ValidationDataloaderRICCI_128Size', 'TestDataloaderRICCI_128Size'
     train_loader = load_dataloader(name_train_d)
     val_loader = load_dataloader(name_vale_d)
     test_loader = load_dataloader(name_test_d)
@@ -352,9 +352,9 @@ def start(gnn, epochs, learningRate, save, patience):
     elif gnn == 'gin':
         model = GIN(dim_h=128, num_node_features=2, num_classes=2)
     elif gnn == 'gcn_noedge':
-        model = GCN_NOEDGE(dim_h=64, num_node_features=2, num_classes=2)
+        model = GCN_NOEDGE(dim_h=128, num_node_features=2, num_classes=2)
     elif gnn == 'gat':
-        model = GAT(dim_h=128, num_node_features=2, num_classes=2, num_heads=5)
+        model = GAT(dim_h=128, num_node_features=2, num_classes=2, num_heads=4)
 
     weight_decay = 1e-4
     optimizer = torch.optim.Adam(model.parameters(), lr=learningRate)  # lr=0.0001
@@ -425,13 +425,13 @@ def start(gnn, epochs, learningRate, save, patience):
                             'Recall': ['{:.3f}'.format(recall)],
                             'F1-Score': ['{:.3f}'.format(f1)],
                             'Comments': [
-                                'lr = 0.0001\noptimizer = Adam\npatience = 100\nglobal_add_pool\ndim_h = 128\nnum_heads = 5']})
+                                'lr = 0.00001\noptimizer = Adam\npatience = 100\nglobal_add_pool\ndim_h = 128']})
 
     # Concatena il DataFrame temporaneo dei dati finali al DataFrame principale
     df = pd.concat([df, temp_df], ignore_index=True)
 
     # Salva il DataFrame formattato in un file CSV
-    csv_file_path = '/Users/Giuseppe Basile/Desktop/New_Morphing/modelsEquals/' + f'{gnn}{name_final_file}_Details.csv'
+    csv_file_path = '/Users/Giuseppe Basile/Desktop/New_Morphing/modelsRICCI/' + f'{gnn}{name_final_file}_Details.csv'
     df.to_csv(csv_file_path, index=False, float_format='%.2f')
 
     # GRAPH FOR ACCURACY
@@ -443,7 +443,7 @@ def start(gnn, epochs, learningRate, save, patience):
     plt.legend()
 
     # Save the accuracy graph in the same directory as the model
-    save_dir = '/Users/Giuseppe Basile/Desktop/New_Morphing/modelsEquals/'
+    save_dir = '/Users/Giuseppe Basile/Desktop/New_Morphing/modelsRICCI/'
     plt.savefig(os.path.join(save_dir, f'{gnn}{name_final_file}_Accuracy_Graph.png'))
     plt.show()
 
@@ -456,7 +456,7 @@ def start(gnn, epochs, learningRate, save, patience):
     plt.legend()
 
     # Save the loss graph in the same directory as the model
-    save_dir = '/Users/Giuseppe Basile/Desktop/New_Morphing/modelsEquals/'
+    save_dir = '/Users/Giuseppe Basile/Desktop/New_Morphing/modelsRICCI/'
     plt.savefig(os.path.join(save_dir, f'{gnn}{name_final_file}_Loss_Graph.png'))
     plt.show()
 
@@ -470,11 +470,31 @@ def start(gnn, epochs, learningRate, save, patience):
 
     if save == True:
         torch.save(model.state_dict(),
-                   '/Users/Giuseppe Basile/Desktop/New_Morphing/modelsEquals/' + gnn + name_final_file + '_Binary_model.pth')
+                   '/Users/Giuseppe Basile/Desktop/New_Morphing/modelsRICCI/' + gnn + name_final_file + '_Binary_model.pth')
 
 
 def main():
-    start('gat', 1500, 0.0001, True, 100)  # 150 epoche gin
+    start('gat', 1500, 0.00001, True, 100)  # 150 epoche gin
+    # print("ARRAY: " + str(array))
+    # d = load_dataloader('TrainDataloaderRICCI_128Size')
+    # d1 = load_dataloader('TestDataloaderRICCI_128SizeRICCI')
+    # d2 = load_dataloader('ValidationDataloaderRICCI_128Size')
+    # dset = d.dataset
+    # dset1 = d1.dataset
+    # dset2 = d2.dataset
+    # print('len di train:' + str(len(dset)) + '\n' + 'len di test:' + str(
+    #     len(dset1)))
+    # count = 0
+    # c = 0
+    # print("STAMPO DATALOADER train: ")
+    # for data in dset:
+    #     if data.y == 1:
+    #         print(data)
+            # count += 1
+        # if data.y == 1:
+            # c += 1
+    # print(count)
+    # print(c)
 
 
 if __name__ == "__main__":

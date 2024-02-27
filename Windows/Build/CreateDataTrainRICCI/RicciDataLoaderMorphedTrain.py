@@ -129,10 +129,7 @@ def colleziona_grafo(dir_path):
             num_graph = 0
             foto_name = percorso_immagine.split(os.path.sep)[-1]
             img = cv2.imread(percorso_immagine)
-            graph = mp.buildGraphNorm(img, distType)
-            #ricciCurvGraph = mp.buildGraphNormOllivierCurvature(img, distType)
-            mp.computeRicciCurvature(graph)
-            mp.show_results(graph)
+            graph = mp.buildOllivierRicciGraph(img, distType)
             #if graph is None:
             #    none_graphs = 1
             #    print(f"\n Null graph index: {num_graph} , number of null graphs: {none_graphs}")

@@ -7,14 +7,14 @@ def esegui_file(file_path):
 
 def main():
     # Ciclo dei percorsi delle 8 sottocartelle
-    for i in range(1, 9):
-        percorso_cartella = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\datasets\SMDD_dataset\bf_cropped\SubFolder_Bonafide_" + str(i)
-        with open("Cartella.txt", "w") as file:
+    for i in range(10, 13):
+        percorso_cartella = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\datasets\SMDD_FRLL_merged\Bonafide_cropped\SubFolder_Bonafide_" + str(i)
+        with open("CartellaMerged.txt", "w") as file:
             file.truncate(0)  # Elimina il contenuto esistente
             file.write(percorso_cartella)
 
-        esegui_file("DataLoaderBonafideTrain.py")
-        print("Fine 2k Foto.\nAttendi 10sec prima che le prossime 2k foto vengono eseguite... :)")
+        esegui_file("addBF.py")
+        print("Fine Foto.\nAttendi 10sec prima che le prossime foto vengono eseguite... :)")
         time.sleep(10)  # Ritardo di 20 secondi tra le esecuzioni
 
 if __name__ == "__main__":

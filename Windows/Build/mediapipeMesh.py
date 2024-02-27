@@ -5,7 +5,6 @@ from GraphRicciCurvature.FormanRicci import FormanRicci
 from GraphRicciCurvature.OllivierRicci import OllivierRicci
 from scipy.spatial import distance
 
-
 # FILE DI RICCIDATA.PY
 import matplotlib.pyplot as plt
 
@@ -136,12 +135,6 @@ def buildGraphNorm(image, distType):
 
     return graph
 
-def computeRicciCurvature(graph):
-    ricci_curvature = OllivierRicci(graph)
-    ricci_curvature.compute_ricci_curvature()
-    return ricci_curvature
-
-
 
 # Builds complete graph
 def buildFCGraph(image, distType):
@@ -178,17 +171,20 @@ def buildFCGraph(image, distType):
 
     return graph
 
+
 def buildOllivierRicciGraph(image, distType):
     if (image is None):
         return
-    graph = buildGraphNorm(image, distType)
+    G = buildGraphNorm(image, distType)
 
-    if (graph is None):
+    if (G is None):
         return
+
     # Computes Ollivier-Ricci curv
-    ricciCurvGraph = OllivierRicci(graph)
+    ricciCurvGraph = OllivierRicci(G, alpha=0.5)
     ricciCurvGraph.compute_ricci_curvature()
-    return ricciCurvGraph
+    ricciCurvGraph_orc = ricciCurvGraph.G.copy()
+    return ricciCurvGraph_orc
 
 
 def buildFormanRicciGraph(image, distType):

@@ -1,5 +1,5 @@
 import torch
-import CreateBinaryModel as cm
+import CreateBinaryModelWITHCUDA as cm
 import numpy as np
 from DataLoaderMorphedTrain import normalizeNodefeatures, normalizeValues
 from Windows.Build import mediapipeMesh as mp
@@ -45,17 +45,21 @@ def startClassification(gnn, image):
     class_labels = ['Morphed', 'Bonafide']
 
     if gnn == 'gcn':
-        model = cm.GCN(dim_h=64, num_node_features=2, num_classes=classes)
+        model = cm.GCN(dim_h=128, num_node_features=2, num_classes=classes)
     elif gnn == 'gin':
-        model = cm.GIN(dim_h=64, num_node_features=2, num_classes=classes)
+        model = cm.GIN(dim_h=128, num_node_features=2, num_classes=classes)
+    elif gnn == 'gat':
+        model = cm.GAT(dim_h=128, num_node_features=2, num_classes=classes, num_heads=4)
 
     # Path to the trained weights
     # path = "/Users/Giuseppe Basile/Desktop/New_Morphing/models/" + gnn + bin + "_model_.pth"
-    path = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\models\gcn_CUDA128SizeOpencvFacemorpher_Binary_model.pth"
+    path = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\modelsRICCI\gin_CUDA128SizeRICCI_Binary_model.pth"
     print(path)
 
     # Load trained weights into the model
     model.load_state_dict(torch.load(path))
+
+
     model.eval()  # Evaluation mode
     distType = "manhattan"
 
@@ -65,13 +69,15 @@ def startClassification(gnn, image):
 
     loader = DataLoader([graph_data], batch_size=1)
 
+
+
     # Make predictions
     with torch.no_grad():
         for data in loader:
             if gnn == 'gcn':
                 predictions = model(data.x, data.edge_index, data.batch, data.edge_weight)
-            elif gnn == 'gin':
-                predictions, _ = model(data.x, data.edge_index, data.batch)
+            elif gnn == 'gin' or gnn == 'gat':
+                predictions = model(data.x, data.edge_index, data.batch)
 
     # Extract the predicted class
     predicted_class = predictions.argmax(dim=1).item()
@@ -103,10 +109,12 @@ def startClassification(gnn, image):
 # img = cv2.imread("/Users/Giuseppe Basile/Desktop/New_Morphing/imageTesting/img000001_B.png")
 # startClassification('gcn', image)
 
+
+
 dir_path = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\imageTesting"
 for filename in os.listdir(dir_path):
     percorso_immagine = os.path.join(dir_path, filename)
     # alignedFace = AlignImage.alignFace(percorso_immagine)
     # image, gray_img = AlignImage.detectFace(alignedFace)
     image = cv2.imread(percorso_immagine)
-    startClassification('gcn', image)
+    startClassification('gin', image)
