@@ -9,6 +9,15 @@ import numpy as np
 import os
 import pandas as pd
 
+from sklearn.metrics import precision_score, recall_score, f1_score, roc_curve, auc
+from sklearn.metrics import confusion_matrix, classification_report
+from sklearn.metrics import accuracy_score, precision_recall_curve, average_precision_score
+from sklearn.metrics import roc_auc_score
+from sklearn.preprocessing import label_binarize
+from sklearn.metrics import roc_curve, auc
+from scipy.optimize import brentq
+from scipy.interpolate import interp1d
+
 loss_list = []
 accuracy_list = []
 iteration_list = []
@@ -114,8 +123,8 @@ class GCN(torch.nn.Module):
         x = self.conv3(x, edge_index, edge_weight)
 
         # Graph-level readout
-        x = global_add_pool(x, batch)
-        # x = global_mean_pool(x, batch)
+        # x = global_add_pool(x, batch)
+        x = global_mean_pool(x, batch)
 
         # Classifier
         x = F.dropout(x, p=0.5, training=self.training)
@@ -150,8 +159,8 @@ class GIN(torch.nn.Module):
         x = self.conv3(x, edge_index)
 
         # Graph-level readout
-        x = global_add_pool(x, batch)
-        # x = global_mean_pool(x, batch)
+        # x = global_add_pool(x, batch)
+        x = global_mean_pool(x, batch)
 
         # Classifier
         x = self.lin1(x)
@@ -171,18 +180,15 @@ def train(model, train_loader, val_loader, gnn, optimizer, criterion):
 
     model.train()
 
-    # if torch.cuda.is_available():
-    # model = model.to('cuda')
+    # Muovi il modello sulla GPU se disponibile
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model = model.to(device)
 
     for data in train_loader:
         index += 1
         count += 1
 
-        if torch.cuda.is_available():
-            model = model.to('cuda')
-            data.x, data.edge_index, data.batch, data.edge_weight, data.y = \
-                data.x.to('cuda'), data.edge_index.to('cuda'), data.batch.to('cuda'), data.edge_weight.to(
-                    'cuda'), data.y.to('cuda')
+        data = data.to(device)  # Muovi i dati sulla GPU se disponibile
 
         if gnn == 'gcn':
             out = model(data.x, data.edge_index, data.batch, data.edge_weight)
@@ -207,14 +213,13 @@ def validate(model, val_loader, criterion, gnn):
     model.eval()
     val_loss = 0
 
+    # Muovi il modello sulla GPU se disponibile
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model = model.to(device)
+
     with torch.no_grad():
         for val_data in val_loader:
-            if torch.cuda.is_available():
-                val_data.x, val_data.edge_index, val_data.batch, val_data.edge_weight, val_data.y = \
-                    val_data.x.to('cuda'), val_data.edge_index.to('cuda'), val_data.batch.to(
-                        'cuda'), val_data.edge_weight.to(
-                        'cuda'), val_data.y.to('cuda')
-
+            val_data = val_data.to(device)  # Muovi i dati sulla GPU se disponibile
             if gnn == 'gcn':
                 val_out = model(val_data.x, val_data.edge_index, val_data.batch, val_data.edge_weight)
             elif gnn == 'gin' or gnn == 'gcn_noedge' or gnn == 'gat':
@@ -237,19 +242,13 @@ def test(model, loader, gnn, criterion):
     loss = 0
     accuracy = 0
 
-    # Sposta il modello sulla GPU se CUDA è disponibile
-    # if torch.cuda.is_available():
-    # model = model.to('cuda')
+    # Muovi il modello sulla GPU se disponibile
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model = model.to(device)
 
     with torch.no_grad():
         for data in loader:  # Iterate in batches over the test dataset.
-
-            # Sposta i dati sulla GPU se CUDA è disponibile
-            if torch.cuda.is_available():
-                model = model.to('cuda')
-                data.x, data.edge_index, data.batch, data.edge_weight, data.y = \
-                    data.x.to('cuda'), data.edge_index.to('cuda'), data.batch.to('cuda'), data.edge_weight.to(
-                        'cuda'), data.y.to('cuda')
+            data = data.to(device)  # Muovi i dati sulla GPU se disponibile
 
             if gnn == 'gcn':
                 out = model(data.x, data.edge_index, data.batch, data.edge_weight)
@@ -320,24 +319,24 @@ def buildAndShowConfusionMatrix(true_labels, predicted_labels, gnn):
 
     # Save the plt graphic as image
     plt.savefig(
-        '/Users/Giuseppe Basile/Desktop/New_Morphing/modelsEquals/' + gnn + name_final_file + '_Binary_model.png')
+        '/Users/Giuseppe Basile/Desktop/New_Morphing/models2/' + gnn + name_final_file + '_Binary_model.png')
     plt.show()
 
 
 def load_dataloader(filename):
-    path = "/Users/Giuseppe Basile/Desktop/New_Morphing/dataloadersMerged/" + filename + ".pt"
+    path = "/Users/Giuseppe Basile/Desktop/New_Morphing/dataloaders/" + filename + ".pt"
     loader = torch.load(path)
     print(f"Dataloader {filename} loaded")
     return loader
 
 
-name_final_file = '_CUDA128Size'
+name_final_file = '_CUDA128SizeOpencvAmsl'
 
 
 # start function used to begin the training phase
 def start(gnn, epochs, learningRate, save, patience):
     global name_final_file
-    name_train_d, name_vale_d, name_test_d = 'TrainDataloader_128Size', 'ValidationDataloader_128Size', 'TestDataloader_128Size'
+    name_train_d, name_vale_d, name_test_d = 'TrainDataloader_128Size', 'TestDataloadermorph_amsl', 'TestDataloadermorph_opencv'
     train_loader = load_dataloader(name_train_d)
     val_loader = load_dataloader(name_vale_d)
     test_loader = load_dataloader(name_test_d)
@@ -346,15 +345,17 @@ def start(gnn, epochs, learningRate, save, patience):
     best_val_loss = float('inf')
     epochs_without_improvement = 0
 
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
     # checks on the type of model
     if gnn == 'gcn':
-        model = GCN(dim_h=128, num_node_features=2, num_classes=2)
+        model = GCN(dim_h=128, num_node_features=2, num_classes=2).to(device)
     elif gnn == 'gin':
-        model = GIN(dim_h=128, num_node_features=2, num_classes=2)
+        model = GIN(dim_h=128, num_node_features=2, num_classes=2).to(device)
     elif gnn == 'gcn_noedge':
-        model = GCN_NOEDGE(dim_h=64, num_node_features=2, num_classes=2)
+        model = GCN_NOEDGE(dim_h=128, num_node_features=2, num_classes=2).to(device)
     elif gnn == 'gat':
-        model = GAT(dim_h=128, num_node_features=2, num_classes=2, num_heads=5)
+        model = GAT(dim_h=128, num_node_features=2, num_classes=2, num_heads=5).to(device)
 
     weight_decay = 1e-4
     optimizer = torch.optim.Adam(model.parameters(), lr=learningRate)  # lr=0.0001
@@ -420,18 +421,23 @@ def start(gnn, epochs, learningRate, save, patience):
     recall = recall_score(true_labels, predicted_labels)
     f1 = f1_score(true_labels, predicted_labels)
 
+    # Get ROC curve and calculate EER
+    fpr, tpr, _ = roc_curve(true_labels, predicted_labels)
+    eer = brentq(lambda x: 1. - x - interp1d(fpr, tpr)(x), 0., 1.)
+
     # Crea un DataFrame temporaneo per i dati di precision, recall e f1-score
     temp_df = pd.DataFrame({'Precision': ['{:.3f}'.format(precision)],
                             'Recall': ['{:.3f}'.format(recall)],
                             'F1-Score': ['{:.3f}'.format(f1)],
+                            'EER': ['{:.3f}'.format(eer)],
                             'Comments': [
-                                'lr = 0.0001\noptimizer = Adam\npatience = 100\nglobal_add_pool\ndim_h = 128\nnum_heads = 5']})
+                                'lr = 0.0001\noptimizer = Adam\npatience = 100\nglobal_add_pool\ndim_h = 128']})
 
     # Concatena il DataFrame temporaneo dei dati finali al DataFrame principale
     df = pd.concat([df, temp_df], ignore_index=True)
 
     # Salva il DataFrame formattato in un file CSV
-    csv_file_path = '/Users/Giuseppe Basile/Desktop/New_Morphing/modelsEquals/' + f'{gnn}{name_final_file}_Details.csv'
+    csv_file_path = '/Users/Giuseppe Basile/Desktop/New_Morphing/models2/' + f'{gnn}{name_final_file}_Details.csv'
     df.to_csv(csv_file_path, index=False, float_format='%.2f')
 
     # GRAPH FOR ACCURACY
@@ -443,7 +449,7 @@ def start(gnn, epochs, learningRate, save, patience):
     plt.legend()
 
     # Save the accuracy graph in the same directory as the model
-    save_dir = '/Users/Giuseppe Basile/Desktop/New_Morphing/modelsEquals/'
+    save_dir = '/Users/Giuseppe Basile/Desktop/New_Morphing/models2/'
     plt.savefig(os.path.join(save_dir, f'{gnn}{name_final_file}_Accuracy_Graph.png'))
     plt.show()
 
@@ -456,7 +462,7 @@ def start(gnn, epochs, learningRate, save, patience):
     plt.legend()
 
     # Save the loss graph in the same directory as the model
-    save_dir = '/Users/Giuseppe Basile/Desktop/New_Morphing/modelsEquals/'
+    save_dir = '/Users/Giuseppe Basile/Desktop/New_Morphing/models2/'
     plt.savefig(os.path.join(save_dir, f'{gnn}{name_final_file}_Loss_Graph.png'))
     plt.show()
 
@@ -466,16 +472,16 @@ def start(gnn, epochs, learningRate, save, patience):
 
     # Print and save precision, recall, and F1-score
     print(f'Test Loss: {test_loss:.3f}, Test Acc: {test_acc:.3f}')
-    print(f'Precision: {precision:.3f}, Recall: {recall:.3f}, F1-Score: {f1:.3f}')
+    print(f'Precision: {precision:.3f}, Recall: {recall:.3f}, F1-Score: {f1:.3f}, EER: {eer:.3f}')
 
     if save == True:
         torch.save(model.state_dict(),
-                   '/Users/Giuseppe Basile/Desktop/New_Morphing/modelsEquals/' + gnn + name_final_file + '_Binary_model.pth')
-
+                   '/Users/Giuseppe Basile/Desktop/New_Morphing/models2/' + gnn + name_final_file + '_Binary_model.pth')
 
 def main():
-    start('gat', 1500, 0.0001, True, 100)  # 150 epoche gin
+    start('gin', 1000, 0.0001, True, 1000)  # 150 epoche gin
 
 
 if __name__ == "__main__":
     main()
+

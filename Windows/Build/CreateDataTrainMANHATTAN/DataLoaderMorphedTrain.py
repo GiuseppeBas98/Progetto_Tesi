@@ -106,9 +106,6 @@ distType = "manhattan"
 num_grafico = 0
 
 
-def print_memory_usage():
-    print(f"Memory Usage: {psutil.virtual_memory().percent}%")
-
 
 def colleziona_grafo(dir_path):
     global array
@@ -136,11 +133,6 @@ def colleziona_grafo(dir_path):
             label = 'morphed'
             grafo = graph2Data(graph, label)
             array.append(grafo)
-
-            # addGraph(grafo, subject)
-            # print_memory_usage()
-            # print(f"Total Subjects: {len(subjectsTrain)}")
-            # print(len(array))
 
 
 def image_generator_morphed():
@@ -179,12 +171,12 @@ def load_dataloader(filename):
 
 def crea_dataLoader():
     global array
-    path_dataloader_daEliminare = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\dataloaders\TrainDataloader_128Size.pt"
+    path_dataloader_daEliminare = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\dataloaders\TrainDataloader.pt"
 
     # Verifica se il file esiste
     if os.path.exists(path_dataloader_daEliminare):
         # Se il file esiste, sovrascrivi il dataloader e salva
-        data_loader = load_dataloader('TrainDataloader_128Size')
+        data_loader = load_dataloader('TrainDataloader')
         dataset_originale = data_loader.dataset
         print("ARRAY VECCHIO: ")
         print(len(dataset_originale))
@@ -227,18 +219,16 @@ def main():
     dset = d.dataset
     # dset1 = d1.dataset
     count = 0
+    c = 0
     print("STAMPO dataset: ")
     for data in dset:
-        count += 1
-        print(data)
-        if count > 4:
-            break
-    print("STAMPO DATALOADER: ")
-    for data in d:
-        count += 1
-        print(data)
-        if count > 4:
-            break
+        if data.y == 0:
+            count += 1
+        if data.y == 1:
+            c += 1
+    print(count)
+    print(c)
+
 
 if __name__ == "__main__":
     main()

@@ -137,11 +137,6 @@ def colleziona_grafo(dir_path):
             grafo = graph2Data(graph, label)
             array.append(grafo)
 
-            # addGraph(grafo, subject)
-            # print_memory_usage()
-            # print(f"Total Subjects: {len(subjectsTrain)}")
-            # print(len(array))
-
 
 def image_generator_bonafide():
     with open("Cartella.txt", "r") as file:
@@ -179,12 +174,12 @@ def load_dataloader(filename):
 
 def crea_dataLoader():
     global array
-    path_dataloader_daEliminare = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\dataloaders\TrainDataloader_128Size.pt"
+    path_dataloader_daEliminare = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\dataloaders\TrainDataloader.pt"
 
     # Verifica se il file esiste
     if os.path.exists(path_dataloader_daEliminare):
         # Se il file esiste, sovrascrivi il dataloader e salva
-        data_loader = load_dataloader('TrainDataloader_128Size')
+        data_loader = load_dataloader('TrainDataloader')
         dataset_originale = data_loader.dataset
         print("ARRAY VECCHIO: ")
         print(len(dataset_originale))
