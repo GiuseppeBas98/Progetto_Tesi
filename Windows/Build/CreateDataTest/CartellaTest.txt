@@ -1,1 +1,1 @@
-C:\Users\Giuseppe Basile\Desktop\New_Morphing\datasets\FRLL_dataset\FRLL-Morphs\morph_webmorph
+C:\Users\Giuseppe Basile\Desktop\New_Morphing\datasets\FRLL_dataset\FRLL-Morphs\morph_stylegan

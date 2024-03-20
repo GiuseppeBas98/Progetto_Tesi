@@ -53,7 +53,7 @@ def startClassification(gnn, image):
 
     # Path to the trained weights
     # path = "/Users/Giuseppe Basile/Desktop/New_Morphing/models/" + gnn + bin + "_model_.pth"
-    path = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\modelsRICCI\gin_CUDA128SizeRICCI_Binary_model.pth"
+    path = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\modelsTesiOld\gcn_CUDA128FacemorpherAmsl_Binary_model.pth"
     print(path)
 
     # Load trained weights into the model
@@ -89,7 +89,7 @@ def startClassification(gnn, image):
     position = (10, 30)
 
     # Text color and font size
-    font_color = (0, 0, 255)  # Red
+    font_color = (0, 255, 255)
     font_scale = 1
     font = cv2.FONT_HERSHEY_SIMPLEX
 
@@ -117,4 +117,4 @@ for filename in os.listdir(dir_path):
     # alignedFace = AlignImage.alignFace(percorso_immagine)
     # image, gray_img = AlignImage.detectFace(alignedFace)
     image = cv2.imread(percorso_immagine)
-    startClassification('gin', image)
+    startClassification('gcn', image)

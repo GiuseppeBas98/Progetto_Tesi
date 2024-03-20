@@ -104,8 +104,6 @@ subjectsTest = []
 noneGraphs = 0
 distType = "manhattan"
 num_grafico = 0
-file_name = "../pisello.py.txt"
-file_path = r"/Windows/Build/graph2TrainDataMANHATTAN.txt"
 nome_cartella = ""
 
 def print_memory_usage():
@@ -181,7 +179,7 @@ def load_dataloader(filename):
 def crea_dataLoader():
     global array
     global nome_cartella
-    data_loader = create_dataloader(array, batch_size=60)
+    data_loader = create_dataloader(array, batch_size=128)
     save_dataloader(data_loader, 'TestDataloader' + nome_cartella)
     # dataset = data_loader.dataset
     # print(dataset)
@@ -195,22 +193,9 @@ def elimina_file_dataloader(file_path):
     except OSError as e:
         print(f"Errore durante l'eliminazione del file: {e}")
 
+def main():
+    beginLoopTest()
 
-beginLoopTest()
-# d = load_dataloader('TestDataloadermorph_opencv')
-# dset = d.dataset
-# print(str(len(d)) + "   " + str(len(dset)))
-# print("STAMPO DATALOADER: ")
-# for data in d:
-#     print(data)
 
-# print(array)
-# d = load_dataloader('TestDataLoaderprovsa')
-# dset1 = d_amsl.dataset
-# print("SET AMSL: ")
-# print(len(d))
-# for data in d:
-#     print(data[0].y)
-# per = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\prova\provsa\001_016.jpg"
-# img = cv2.imread(per)
-# mp.showGraph(img, distType)
+if __name__ == "__main__":
+    main()

@@ -174,24 +174,20 @@ def load_dataloader(filename):
 
 def crea_dataLoader():
     global array
-    path_dataloader_daEliminare = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\dataloaders\TrainDataloader.pt"
+    path_dataloader_daEliminare = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\dataloaders\TestDataloadermorph_stylegan.pt"
 
     # Verifica se il file esiste
     if os.path.exists(path_dataloader_daEliminare):
         # Se il file esiste, sovrascrivi il dataloader e salva
-        data_loader = load_dataloader('TrainDataloader')
+        data_loader = load_dataloader('TestDataloadermorph_stylegan')
         dataset_originale = data_loader.dataset
-        print("ARRAY VECCHIO: ")
-        print(len(dataset_originale))
 
         array.extend(dataset_originale)
-        print("ARRAY NUOVO: ")
-        print(len(array))
 
         elimina_file_dataloader(path_dataloader_daEliminare)
 
         dataLoader = create_dataloader(array, batch_size=128)
-        save_dataloader(dataLoader, 'TrainDataloader_128Size')
+        save_dataloader(dataLoader, 'TestDataloadermorphEQUALS_stylegan')
         dataset = dataLoader.dataset
         print("LUNGHEZZA: ")
         print(len(dataset))
@@ -199,7 +195,7 @@ def crea_dataLoader():
     else:
         # Se il file non esiste, crea un nuovo dataloader e salva
         data_loader = create_dataloader(array, batch_size=128)
-        save_dataloader(data_loader, 'TrainDataloader_128Size')
+        save_dataloader(data_loader, 'TestDataloadermorph_amsl')
         # dataset = data_loader.dataset
         # print(dataset)
 
@@ -216,13 +212,21 @@ def elimina_file_dataloader(file_path):
 def main():
     beginLoopTrain()
     # print("ARRAY: " + str(array))
-    # d = load_dataloader('TrainDataloader_128Size')
+    # d = load_dataloader('TestDataloadermorphEQUALS_opencv')
+    # d1 = load_dataloader('TestDataloadermorph_facemorpher')
     # dset = d.dataset
+    # dset1 = d1.dataset
     # print(str(len(d)))
     # count = 0
-    # print("STAMPO DATALOADER: ")
-    # for data in d:
-    #     print(data.y)
+    # c = 0
+    # print("STAMPO dataset: ")
+    # for data in dset:
+    #     if data.y == 0:
+    #         count += 1
+    #     if data.y == 1:
+    #         c += 1
+    # print(count)
+    # print(c)
 
 if __name__ == "__main__":
     main()

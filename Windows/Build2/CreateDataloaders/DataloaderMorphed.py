@@ -233,26 +233,46 @@ def elimina_file_dataloader(file_path):
 
 def main():
     # print(torch.__version__)
-    beginLoopTrain()
+    # beginLoopTrain()
     # print("ARRAY: " + str(array))
-    # d = load_dataloader('TrainDataloader_128Size')
-    # d1 = load_dataloader('TestDataloader_128Size')
-    # d2 = load_dataloader('ValidationDataloader_128Size')
-    # dset = d.dataset
-    # dset1 = d1.dataset
-    # dset2 = d2.dataset
+    d = load_dataloader('TrainDataloader_128Size')
+    d1 = load_dataloader('TestDataloader_128Size')
+    d2 = load_dataloader('ValidationDataloader_128Size')
+    dset = d.dataset
+    dset1 = d1.dataset
+    dset2 = d2.dataset
     # print('len di train:' + str(len(dset)) + '\n' + 'len di test:' + str(
     #     len(dset1)) + '\n' + 'len di val:' + str(len(dset2)))
-    # count = 0
-    # c = 0
-    # print("STAMPO DATALOADER: ")
-    # for data in dset:
-    #     if data.y == 0:
-    #         count += 1
-    #     if data.y == 1:
-    #         c += 1
-    # print(count)
-    # print(c)
+    count = 0
+    c = 0
+    print("STAMPO DATALOADER train: ")
+    for data in dset:
+        if data.y == 0:
+            count += 1
+        if data.y == 1:
+            c += 1
+    print(count)
+    print(c)
+    count = 0
+    c = 0
+    print("STAMPO DATALOADER validation: ")
+    for data in dset2:
+        if data.y == 0:
+            count += 1
+        if data.y == 1:
+            c += 1
+    print(count)
+    print(c)
+    count = 0
+    c = 0
+    print("STAMPO DATALOADER test: ")
+    for data in dset1:
+        if data.y == 0:
+            count += 1
+        if data.y == 1:
+            c += 1
+    print(count)
+    print(c)
 
 
 if __name__ == "__main__":

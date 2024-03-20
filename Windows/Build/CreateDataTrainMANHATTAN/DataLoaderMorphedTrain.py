@@ -212,22 +212,28 @@ def elimina_file_dataloader(file_path):
 
 def main():
     # print(torch.__version__)
-    # beginLoopTrain()
+    beginLoopTrain()
     # print("ARRAY: " + str(array))
-    d = load_dataloader('TrainDataloader_128Size')
-    # d1 = load_dataloader('TestDataloadermorph_opencv')
-    dset = d.dataset
+    # d = load_dataloader('TrainDataloader_128Size')
+    # d1 = load_dataloader('TestDataloadermorph_webmorph')
+    # dset = d.dataset
     # dset1 = d1.dataset
-    count = 0
-    c = 0
-    print("STAMPO dataset: ")
-    for data in dset:
-        if data.y == 0:
-            count += 1
-        if data.y == 1:
-            c += 1
-    print(count)
-    print(c)
+    # count = 0
+    # c = 0
+    # print("STAMPO dataset: ")
+    # for data in dset1:
+    #     if data.y == 0:
+    #         count += 1
+    #     if data.y == 1:
+    #         c += 1
+    # print(count)
+    # print(c)
+
+    # percorso_immagine = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\prova\img000001_B.png"
+    # img = cv2.imread(percorso_immagine)
+    # mp.showGraph(img, distType)
+
+
 
 
 if __name__ == "__main__":

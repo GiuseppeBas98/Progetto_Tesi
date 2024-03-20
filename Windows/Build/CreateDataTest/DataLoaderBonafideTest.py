@@ -146,7 +146,7 @@ def image_generator():
     with open("CartellaTest.txt", "r") as file:
         dir_path_nome = file.read()
 
-    dir_path = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\datasets\FRLL_dataset\FRLL_bonafide"
+    dir_path = r"C:\Users\Giuseppe Basile\Desktop\New_Morphing\datasets\FRLL_dataset\FRLL_bonafide\Bonafide"
     print("Analizzo foto in Cartella: " + dir_path)
     colleziona_grafo(dir_path)
 
@@ -199,22 +199,19 @@ def crea_dataLoader():
         print("ARRAY VECCHIO: ")
         print(len(dataset_originale))
 
-        array += dataset_originale
+        array.extend(dataset_originale)
 
         print("ARRAY NUOVO: ")
         print(len(array))
 
         elimina_file_dataloader(path_dataloader_daEliminare)
 
-        data_loader = create_dataloader(array, batch_size=60)
-        save_dataloader(data_loader, 'TestDataloader' + nome_cartella)
-        #dataset = data_loader.dataset
-        #print("LUNGHEZZA: ")
-        #print(len(dataset))
+        dataLoader = create_dataloader(array, batch_size=128)
+        save_dataloader(dataLoader, 'TestDataloader' + nome_cartella)
 
     else:
         # Se il file non esiste, crea un nuovo dataloader e salva
-        data_loader = create_dataloader(array, batch_size=60)
+        data_loader = create_dataloader(array, batch_size=128)
         save_dataloader(data_loader, 'TestDataloader' + nome_cartella)
         # dataset = data_loader.dataset
         # print(dataset)
@@ -229,6 +226,3 @@ def elimina_file_dataloader(file_path):
         print(f"Errore durante l'eliminazione del file: {e}")
 
 beginLoopTest()
-#d = load_dataloader('TestDataloader' + nome_cartella)
-#dset = d.dataset
-#print(dset)

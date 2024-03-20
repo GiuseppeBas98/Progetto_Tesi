@@ -8,7 +8,6 @@ from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, precision_
 import numpy as np
 import os
 import pandas as pd
-
 from sklearn.metrics import precision_score, recall_score, f1_score, roc_curve, auc
 from sklearn.metrics import confusion_matrix, classification_report
 from sklearn.metrics import accuracy_score, precision_recall_curve, average_precision_score
@@ -23,25 +22,6 @@ accuracy_list = []
 iteration_list = []
 count = 0
 
-
-class GraphSAGE(torch.nn.Module):
-    def __init__(self, dim_h, num_node_features, num_classes):
-        super(GraphSAGE, self).__init__()
-        self.conv1 = SAGEConv(num_node_features, dim_h)
-        self.conv2 = SAGEConv(dim_h, dim_h)
-        self.conv3 = SAGEConv(dim_h, dim_h)
-        self.lin = Linear(dim_h, num_classes)
-
-    def forward(self, x, edge_index, batch):
-        x = self.conv1(x, edge_index)
-        x = F.relu(x)
-        x = self.conv2(x, edge_index)
-        x = F.relu(x)
-        x = self.conv3(x, edge_index)
-        x = global_add_pool(x, batch)
-        x = F.dropout(x, p=0.5, training=self.training)
-        x = self.lin(x)
-        return x
 
 
 class GAT(torch.nn.Module):
@@ -94,7 +74,7 @@ class GCN_NOEDGE(torch.nn.Module):
 
         # Graph-level readout
         # x = global_add_pool(x, batch)
-        x= global_mean_pool(x,batch)
+        x = global_mean_pool(x, batch)
 
         # Classifier
         x = F.dropout(x, p=0.5, training=self.training)
@@ -315,11 +295,11 @@ def buildAndShowConfusionMatrix(true_labels, predicted_labels, gnn):
 
     plt.xlabel('Predicted Label', fontdict=label_font_dict)
     plt.ylabel('True Label', fontdict=label_font_dict)
-    plt.title('GCN', fontdict=title_font_dict)
+    plt.title(gnn, fontdict=title_font_dict)
 
     # Save the plt graphic as image
     plt.savefig(
-        '/Users/Giuseppe Basile/Desktop/New_Morphing/models2/' + gnn + name_final_file + '_Binary_model.png')
+        '/Users/Giuseppe Basile/Desktop/New_Morphing/models3/' + gnn + name_final_file + '_Binary_model.png')
     plt.show()
 
 
@@ -330,13 +310,13 @@ def load_dataloader(filename):
     return loader
 
 
-name_final_file = '_CUDA128SizeOpencvAmsl'
+name_final_file = '_CUDA128FacemorpherAmsl'
 
 
 # start function used to begin the training phase
 def start(gnn, epochs, learningRate, save, patience):
     global name_final_file
-    name_train_d, name_vale_d, name_test_d = 'TrainDataloader_128Size', 'TestDataloadermorph_amsl', 'TestDataloadermorph_opencv'
+    name_train_d, name_vale_d, name_test_d = 'TrainDataloader_128Size', 'TestDataloadermorph_amsl', 'TestDataloadermorph_facemorpher'
     train_loader = load_dataloader(name_train_d)
     val_loader = load_dataloader(name_vale_d)
     test_loader = load_dataloader(name_test_d)
@@ -346,6 +326,7 @@ def start(gnn, epochs, learningRate, save, patience):
     epochs_without_improvement = 0
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print(device)
 
     # checks on the type of model
     if gnn == 'gcn':
@@ -355,7 +336,7 @@ def start(gnn, epochs, learningRate, save, patience):
     elif gnn == 'gcn_noedge':
         model = GCN_NOEDGE(dim_h=128, num_node_features=2, num_classes=2).to(device)
     elif gnn == 'gat':
-        model = GAT(dim_h=128, num_node_features=2, num_classes=2, num_heads=5).to(device)
+        model = GAT(dim_h=128, num_node_features=2, num_classes=2, num_heads=2).to(device)
 
     weight_decay = 1e-4
     optimizer = torch.optim.Adam(model.parameters(), lr=learningRate)  # lr=0.0001
@@ -365,7 +346,7 @@ def start(gnn, epochs, learningRate, save, patience):
     df = pd.DataFrame(
         columns=['Train Set', 'Val Set', 'Test Set', 'Epoch', 'Train Loss', 'Train Acc', 'Val Loss', 'Val Acc',
                  'Test Loss', 'Test Acc', 'Precision',
-                 'Recall', 'F1-Score', 'Comments'])
+                 'Recall', 'F1-Score', 'EER', 'Comments'])
 
     temp_df = pd.DataFrame({'Train Set': [name_train_d],
                             'Val Set': [name_vale_d],
@@ -431,13 +412,13 @@ def start(gnn, epochs, learningRate, save, patience):
                             'F1-Score': ['{:.3f}'.format(f1)],
                             'EER': ['{:.3f}'.format(eer)],
                             'Comments': [
-                                'lr = 0.0001\noptimizer = Adam\npatience = 100\nglobal_add_pool\ndim_h = 128']})
+                                'lr = 0.00001\noptimizer = Adam\npatience = 1500\nglobal_mean_pool\ndim_h = 128\nnum_node_features=1']})
 
     # Concatena il DataFrame temporaneo dei dati finali al DataFrame principale
     df = pd.concat([df, temp_df], ignore_index=True)
 
     # Salva il DataFrame formattato in un file CSV
-    csv_file_path = '/Users/Giuseppe Basile/Desktop/New_Morphing/models2/' + f'{gnn}{name_final_file}_Details.csv'
+    csv_file_path = '/Users/Giuseppe Basile/Desktop/New_Morphing/models3/' + f'{gnn}{name_final_file}_Details.csv'
     df.to_csv(csv_file_path, index=False, float_format='%.2f')
 
     # GRAPH FOR ACCURACY
@@ -449,7 +430,7 @@ def start(gnn, epochs, learningRate, save, patience):
     plt.legend()
 
     # Save the accuracy graph in the same directory as the model
-    save_dir = '/Users/Giuseppe Basile/Desktop/New_Morphing/models2/'
+    save_dir = '/Users/Giuseppe Basile/Desktop/New_Morphing/models3/'
     plt.savefig(os.path.join(save_dir, f'{gnn}{name_final_file}_Accuracy_Graph.png'))
     plt.show()
 
@@ -462,7 +443,7 @@ def start(gnn, epochs, learningRate, save, patience):
     plt.legend()
 
     # Save the loss graph in the same directory as the model
-    save_dir = '/Users/Giuseppe Basile/Desktop/New_Morphing/models2/'
+    save_dir = '/Users/Giuseppe Basile/Desktop/New_Morphing/models3/'
     plt.savefig(os.path.join(save_dir, f'{gnn}{name_final_file}_Loss_Graph.png'))
     plt.show()
 
@@ -476,12 +457,12 @@ def start(gnn, epochs, learningRate, save, patience):
 
     if save == True:
         torch.save(model.state_dict(),
-                   '/Users/Giuseppe Basile/Desktop/New_Morphing/models2/' + gnn + name_final_file + '_Binary_model.pth')
+                   '/Users/Giuseppe Basile/Desktop/New_Morphing/models3/' + gnn + name_final_file + '_Binary_model.pth')
+
 
 def main():
-    start('gin', 1000, 0.0001, True, 1000)  # 150 epoche gin
+    start('gat', 1000, 0.00001, True, 100)  # 150 epoche gin
 
 
 if __name__ == "__main__":
     main()
-
