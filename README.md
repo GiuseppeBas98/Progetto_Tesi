@@ -1,6 +1,5 @@
 # Analysis and Detection of Face Morphing using Graph Neural Networks.
-Bachelor's degree thesis project Repository
-
+Bachelor's thesis project repository in Computer Science at the University of Salerno.
 ## Prerequisites
 
 - Python 3.11 or later
